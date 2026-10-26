@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大巴扎生涯个人爱好表</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:#e8e4dc;color:#15110c;
+    font:14px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.locked{overflow:hidden}
+  header{max-width:1240px;margin:0 auto;padding:26px 20px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0;letter-spacing:.5px}
+  header .hint{color:#7d7466;font-size:12px}
+  main{max-width:1240px;margin:0 auto;padding:14px 20px 60px;display:flex;gap:20px;align-items:flex-start}
+  .stage{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;gap:14px}
+  .canvas-wrap{position:relative;line-height:0;max-width:100%}
+  canvas#grid{
+    display:block;max-width:100%;height:auto;background:#fff;cursor:pointer;
+    border-radius:4px;box-shadow:0 6px 22px rgba(0,0,0,.12);
+  }
+  .tip{color:#8b8273;font-size:12px;text-align:center}
+
+  aside.panel{flex:0 0 320px;width:320px;display:flex;flex-direction:column;gap:12px}
+  .card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+  .card h3{margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:#3a342b}
+  .card h3 small{font-weight:400;color:#a49a8b}
+  input[type=text],input[type=number],textarea,select{
+    width:100%;font:inherit;padding:8px 10px;border:1.5px solid #d3cbbd;border-radius:5px;background:#fff;outline:none;color:#15110c;
+  }
+  input:focus,textarea:focus,select:focus{border-color:#15110c}
+  textarea{resize:vertical;line-height:1.6;font-size:13px}
+  .row2{display:flex;gap:8px}
+  .row2>*{flex:1;min-width:0}
+  label.f{display:block;font-size:12px;color:#7d7466;margin-bottom:4px}
+  .chk{display:flex;align-items:center;gap:6px;font-size:13px;color:#4a4438;margin-top:8px}
+  .chk input{width:auto}
+  button{
+    font:inherit;cursor:pointer;border:1.5px solid #15110c;background:#fff;color:#15110c;
+    padding:8px 12px;border-radius:5px;font-weight:600;transition:background .12s,color .12s;
+  }
+  button:hover{background:#15110c;color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button:disabled:hover{background:#fff;color:#15110c}
+  button.primary{background:#15110c;color:#fff}
+  button.primary:hover{background:#3a342b}
+  button.big{width:100%;padding:12px;font-size:15px}
+  button.danger{border-color:#b8442f;color:#b8442f}
+  button.danger:hover{background:#b8442f;color:#fff}
+  button.mini{padding:5px 9px;font-size:12px;font-weight:500}
+
+  .modal{position:fixed;inset:0;background:rgba(20,16,10,.66);display:flex;align-items:center;justify-content:center;padding:24px 14px;z-index:50}
+  .modal[hidden]{display:none}
+  .sheet{
+    background:#fff;border-radius:10px;width:min(1040px,100%);max-height:100%;
+    display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.4)
+  }
+  .sheet-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #efeae1}
+  .sheet-head h2{margin:0;font-size:15px;font-weight:700}
+  .sheet-head .celltag{font-size:12px;color:#a49a8b}
+  .sheet-head .x{margin-left:auto;border:none;background:none;font-size:18px;line-height:1;padding:6px 8px;color:#7d7466;font-weight:400}
+  .sheet-head .x:hover{background:#f4f0e9;color:#15110c}
+  .sheet-body{display:flex;flex-direction:column;min-height:0;flex:1 1 auto;overflow:hidden;padding:14px 16px;gap:10px}
+  form.searchbar{display:flex;gap:8px;margin:0}
+  form.searchbar input{flex:1}
+  .quickrow{display:flex;gap:6px;flex-wrap:wrap}
+  .quickrow button{padding:4px 9px;font-size:12px;font-weight:500;border-color:#d3cbbd;color:#4a4438}
+  .note{font-size:12px;color:#a49a8b}
+  .note.err{color:#b8442f}
+  .results{
+    overflow-y:auto;flex:1 1 auto;display:grid;gap:10px;align-content:start;
+    grid-template-columns:repeat(auto-fill,minmax(112px,1fr));padding-right:2px;min-height:140px
+  }
+  .results.loading{opacity:.45;pointer-events:none;transition:opacity .15s}
+  .ritem{cursor:pointer;border-radius:6px;padding:5px;transition:background .12s;border:1.5px solid transparent}
+  .ritem:hover{background:#f4f0e9}
+  .ritem.on{border-color:#15110c;background:#f4f0e9}
+  .ritem .box{width:100%;aspect-ratio:1/1;background:#f6f3ee;border-radius:5px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .ritem img{max-width:100%;max-height:100%;display:block}
+  .ritem p{margin:5px 0 0;font-size:11.5px;line-height:1.35;color:#3a342b;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .altway{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-top:1px solid #efeae1;padding-top:10px}
+  .altway label{font-size:12px;color:#7d7466}
+  .altway input[type=text]{flex:1 1 220px;width:auto}
+  .sheet-foot{border-top:1px solid #efeae1;padding:12px 16px;display:flex;gap:8px;background:#fff;justify-content:flex-end}
+  #previewSheet{width:min(820px,100%)}
+  #previewSheet img{max-width:100%;display:block;margin:0 auto;border-radius:6px;background:#fff}
+  .preview-body{padding:16px;overflow:auto}
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translateX(-50%);background:#15110c;color:#fff;
+    padding:9px 16px;border-radius:999px;font-size:13px;z-index:99;opacity:0;transition:opacity .2s;pointer-events:none
+  }
+  .toast.on{opacity:1}
+  .canvas-tools{display:none}
+  .cell-list{display:none}
+
+  @media (max-width:1000px){
+    main{flex-direction:column;align-items:stretch}
+    aside.panel{width:auto;flex:1 1 auto}
+  }
+  @media (max-width:760px){
+    header{padding:16px 14px 4px;gap:6px}
+    header h1{font-size:17px}
+    header .hint{font-size:11.5px;line-height:1.5}
+    main{padding:10px 14px 44px;gap:14px}
+    .stage{gap:10px}
+    .tip{font-size:12px}
+    .canvas-tools{display:flex;justify-content:center;width:100%}
+    .canvas-wrap{width:100%}
+    body.canvas-zoom .canvas-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+    .cell-list{display:flex;flex-direction:column;gap:8px;width:100%}
+    .cell-list::before{content:'格子列表 · 直接改格名，或点「选择」放图';font-size:12px;color:#8b8273;padding:2px 2px 0}
+    .cell-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:10px;padding:8px 10px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+    .cell-row .idx{flex:0 0 auto;width:18px;text-align:center;color:#c0b7a8;font-size:12px}
+    .cell-row .thumb{flex:0 0 auto;width:44px;height:44px;border-radius:6px;background:#f4f0e9;object-fit:contain;display:flex;align-items:center;justify-content:center;color:#c0b7a8;font-size:20px;line-height:1}
+    .cell-row .meta{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+    .cell-row .label-input{width:100%;font-size:16px;padding:6px 8px;border:1.5px solid #e2dbcf;border-radius:6px;min-width:0}
+    .cell-row .sub{font-size:11px;color:#a49a8b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cell-row .acts{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
+    .cell-row .acts button{padding:5px 9px;font-size:12px;font-weight:600}
+    aside.panel{width:auto}
+    .export-card{order:-1}
+    .panel .card{padding:12px}
+    input[type=text],input[type=number],textarea,select{font-size:16px}
+    .modal{padding:0}
+    .sheet{width:100%;height:100%;max-height:100%;border-radius:0}
+    .sheet-head{padding:12px 14px}
+    .results{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+    form.searchbar input{font-size:16px;padding:10px 12px}
+    form.searchbar button{padding:10px 16px}
+    .sheet-foot{padding:10px 14px;box-shadow:0 -6px 16px rgba(0,0,0,.07)}
+    .sheet-foot button{flex:1 1 auto;padding:10px 12px}
+    .altway label{display:none}
+    .altway input[type=text]{flex:1 1 100%}
+    #previewSheet{width:100%;height:100%}
+    #previewSheet .preview-body{flex:1 1 auto;display:flex;align-items:center;justify-content:center;overflow:auto;padding:12px}
+    #previewSheet .preview-body img{max-width:100%;max-height:100%;width:auto}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>大巴扎生涯个人爱好表</h1>
+  <span class="hint">点格子搜图或上传 · 右侧改格名与尺寸 · 生成图片</span>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="canvas-wrap"><canvas id="grid"></canvas></div>
+    <div class="canvas-tools"><button class="mini" id="zoomToggle">查看原尺寸</button></div>
+    <div class="tip">点击任意格子 → 搜索图片 / 上传 → 生成图片导出</div>
+    <section class="cell-list" id="cellList"></section>
+  </section>
+
+  <aside class="panel">
+    <div class="card">
+      <h3>标题</h3>
+      <input type="text" id="titleInput" placeholder="表头标题">
+    </div>
+
+    <div class="card">
+      <h3>网格尺寸</h3>
+      <div class="row2">
+        <label class="f">列数<input type="number" id="colsInput" min="1" max="8" step="1"></label>
+        <label class="f">行数<input type="number" id="rowsInput" min="1" max="8" step="1"></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>格名 <small>每行一个，共 <b id="labelCount">0</b> 个</small></h3>
+      <textarea id="labelsInput" rows="9" spellcheck="false"></textarea>
+      <div class="row2" style="margin-top:8px">
+        <button class="mini" id="defaultLabelsBtn">套用默认格名</button>
+        <button class="mini" id="clearLabelsBtn">清空格名</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>显示</h3>
+      <div class="row2">
+        <label class="f">图片填充
+          <select id="fitSel">
+            <option value="contain">适应（完整显示）</option>
+            <option value="cover">填满（裁切）</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>页脚</h3>
+      <input type="text" id="footerInput">
+      <label class="chk"><input type="checkbox" id="footerShow"> 显示页脚</label>
+    </div>
+
+    <div class="card export-card">
+      <h3>导出</h3>
+      <div class="row2" style="margin-bottom:8px">
+        <select id="fmtSel">
+          <option value="png">PNG（无损）</option>
+          <option value="jpeg">JPG（体积小）</option>
+        </select>
+        <select id="scaleSel">
+          <option value="1">1x</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+        </select>
+      </div>
+      <button class="primary big" id="exportBtn">生成图片</button>
+    </div>
+
+    <div class="card">
+      <h3>配置</h3>
+      <div class="row2" style="margin-bottom:8px">
+        <button class="mini" id="saveJsonBtn">导出配置</button>
+        <button class="mini" id="loadJsonBtn">导入配置</button>
+      </div>
+      <button class="danger mini" id="resetBtn" style="width:100%">清空所有格子</button>
+      <input type="file" id="fileInput" accept="application/json,.json" hidden>
+    </div>
+  </aside>
+</main>
+
+<!-- 选图弹窗 -->
+<div class="modal" id="picker" hidden>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2>选择图片</h2>
+      <span class="celltag" id="cellTag"></span>
+      <button class="x" data-close>✕</button>
+    </div>
+
+    <div class="sheet-body">
+      <form class="searchbar" id="searchForm" autocomplete="off">
+        <input type="text" id="q" placeholder="搜物品 / 英雄 / 技能图，如 sword、Vanessa">
+        <button type="submit" class="primary" id="searchBtn">搜索</button>
+      </form>
+      <div class="quickrow" id="quickRow"></div>
+      <div class="note" id="searchNote"></div>
+      <div class="results" id="results"></div>
+      <div class="altway">
+        <label>或</label>
+        <button class="mini" id="uploadBtn">上传本地图片</button>
+        <input type="text" id="urlInput" placeholder="粘贴图片网址（https://…）">
+        <button class="mini" id="urlBtn">用这个网址</button>
+        <input type="file" id="imgFile" accept="image/*" hidden>
+      </div>
+    </div>
+
+    <div class="sheet-foot">
+      <button class="mini danger" id="clearBtn">清空此格</button>
+      <button class="mini" data-close>关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 预览弹窗 -->
+<div class="modal" id="preview" hidden>
+  <div class="sheet" id="previewSheet">
+    <div class="sheet-head">
+      <h2>生成完成</h2>
+      <span class="celltag" id="previewSize"></span>
+      <button class="x" data-close>✕</button>
+    </div>
+    <div class="preview-body"><img id="previewImg" alt="生成的大巴扎生涯个人爱好表"></div>
+    <div class="sheet-foot">
+      <a id="downloadLink" download><button class="primary">下载图片</button></a>
+      <span class="note" style="margin-left:10px">移动端可长按图片保存</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   常量
+   ============================================================ */
+const STORE_KEY = 'bazaar-grid-v1';
+const WIKI_API = 'https://thebazaar.wiki.gg/api.php';
+const IMG_PROXY = 'https://wsrv.nl/?url=';
+
+const COL_W = 150;
+const IMG_W = COL_W - 2;
+const IMG_H = 186;
+const CAP_H = 26;
+const ROW_H = IMG_H + 1 + CAP_H;
+const SEP_Y = IMG_H + 1;
+const MARGIN = 20;
+const TITLE_H = 46;
+const FOOTER_H = 22;
+
+const DEFAULT_LABELS = [
+  '入坑物品','最爱物品','用得最多','最强物品','最弱物品',
+  '最需重做','最佳画作','最佳名字','最被低估','最过誉',
+  '最佳特效','最讨厌','最轮椅','最难遇到','最有纪念意义'
+];
+
+const QUICK = ['Vanessa','Pygmalien','Dooley','Mak','Stelle','Jules','Sword','Potion','Shield','Skill'];
+
+/* ============================================================
+   状态
+   ============================================================ */
+const state = {
+  title: '大巴扎生涯个人爱好表',
+  cols: 5,
+  rows: 3,
+  labels: DEFAULT_LABELS.slice(),
+  cells: new Array(15).fill(null),
+  footer: '图片来自 The Bazaar Wiki（thebazaar.wiki.gg）· The Bazaar 内容版权归 Tempo 所有',
+  showFooter: true,
+  fit: 'contain',
+  format: 'png',
+  scale: 2
+};
+
+let hoverIndex = -1;
+let currentIndex = null;
+
+/* ============================================================
+   工具
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+const toastEl = $('toast');
+let toastTimer = null;
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove('on'), 2200);
+}
+
+/* 图片统一走 wsrv.nl 代理，保证跨域可读、可导出 */
+function proxied(url, w){
+  if(!url) return '';
+  if(/^data:/i.test(url)) return url;
+  const bare = url.replace(/^https?:\/\//i, '');
+  return IMG_PROXY + encodeURIComponent(bare) + '&w=' + (w || 700) + '&output=png';
+}
+
+/* ===== 图片索引（来自 thebazaar.wiki.gg，构建时抓取，本地检索） ===== */
+const WIKI_FILES=["28_Hour_Fitness.png","3D_Printer.png","A_Strange_Mushroom.png","Abacus.png","Abandoned_Property.png","Active_Arrow_Icon.png","Adaptive_Ordinance.png","Admiral%27s_Badge.png|Admiral's Badge","Adrenal_Converter.png","Advanced_Synthetics.png","Aerial_Assault.png","Aerodrome.png","Aggressive.png","Agility_Boots.png","Ahexa_Board.png","Alacrity.png","Aldric.png","Alembic.jpeg","Alembic.png","All_Talk.png","Alpha_Ray.png","Aludel.jpeg","Aludel.png","Amber.png","Ambergris.png","Ambush.png","Ammo.png","Ammo_Icon.png","Ammo_Stash.png","Anchor.png","Ancient_Vengeance_Sprite.png","Angry_Balloon_Bot.png","Antimatter_Chamber.png","Anything_to_Win.png","Apothecary.jpeg","Apothecary.png","Apropos_Chapeau.png","Arbalest.png","Arbitrage.png","Arc_Blaster.png","Arken%27s_Ring.png|Arken's Ring","Armored_Core.png","Armory.png","Artisan_Dunes.png","Astrolabe.png","Athanor.png","Atlas_Stone.png","AtlasStone.png","Atlatl.png","ATM.png","Atomic_Clock.png","Aurora_Dome.png","Awakened_District%27s_board.png|Awakened District's board","Awakened_Primordial_Board.png","B1%26B2.png|B1&B2","Badblocker.png","Bag_of_Jewels.png","Balcony.png","Ballista.png","Balloon_Bot.png","Banannabal_board.png","Bandages.png","Bar_of_Gold.png","Barbed_Claws.png","Barbed_Wire.png","Barbspike_Warden.png","Barrel.png","Basilisk_Fang.png","Battery.png","Battle_Balloon.png","Battlefield.png","Bayonet.png","Bazaar-avatar-dooley.jpg","Bazaar-avatar-jules.jpg","Bazaar-avatar-mak.jpg","Bazaar-avatar-pygmalien.jpg","Bazaar-avatar-stelle.jpg","Bazaar-avatar-vanessa.jpg","BazaarCON.png","Beach_Ball.png","Beast_of_Burden.png","Beehive.png","Bellelista.png","Belt.png","Beta_Ray.png","BgDark.png","Bill_Dozer.png","Billboard.png","Biohazard.jpeg","Biohazard.png","BiomergeArm.png","Black_Ice.png","Black_Pepper.png","Black_Rose.png","Bladeborn_Badlands.png","Blast_Doors.png","Blazehowl_Warden.png","Blizzard.png","BLK-SP1D3R.jpeg","BLK-SP1D3R.png","Block_Party.png","Bloodreef.png","Bloodreef_Captain_board.png","Bloodreef_Raider_board.png","Blow_torch.png","Blowgun.png","Blowguns_Trap_Board_%28Toxic%29.png|Blowguns Trap Board (Toxic)","BLU-B33TL3.jpeg","BLU-B33TL3.png","Blue_Gumball.png","Blue_Piggles.png","Bluenanas.png","Blunderbuss.png","Boarrior_0317.png","Boarrior_board.png","Boilerroom_Brawler_board.png","Boiling_Flask.jpeg","Boiling_Flask.png","Bolas.png","Bomb_Squad.png","Booby_Trap.png","Boomerang.png","Bootstraps.png","Borrow.png","Boss_Harrow_board.png","Botanical_Gardens.png","Bottled_Explosion.jpeg","Bottled_Explosion.png","Bottled_Lightning.png","Bottled_Tornado.jpeg","Bottled_Tornado.png","Botul.png","Boulder_Trap_Board_%28Fiery%29.png|Boulder Trap Board (Fiery)","Bouncertron_board.png","Bounty_Hunters.png","Bounty_Hunters_board.png","Bounty_Hunters_Event.png","Box_Cutter.png","Brass_Knuckles.png","Brewmaster.png","Brick_Buddy.png","Briefcase.png","Broken_Shackles.png","Bunker.png","Burn.png","Burn_Icon.png","Burninator_Bot_board.png","Burning_Caldera.png","Bushel.png","Business_Card.png","Busy_Bee.png","Butter.png","Butterfly_Swords.png","Cabin_Fishing.png","Cache_of_Riches.png","Calcinator.jpeg","Calcinator.png","Calico.png","Calming_heals.png","Caltrops.png","Candles.png","Candy_Mail.png","Candy_Stash.png","Cannon.png","Cannonade.png","Cannonball.png","Capacitor.png","Captain%27s_Quarters.jpeg|Captain's Quarters","Captain%27s_Quarters.png|Captain's Quarters","Captain%27s_Wheel.png|Captain's Wheel","Car_Conductor.png","Car_Conductor_board.png","Car_Conductor_Portrait.png","Card_Table.png","Cargo_Shorts.png","Cash_Cannon.png","Cash_Register.png","Catalyst.png","Catfish.png","Cauldron.png","Celestial_Conduit.png","Cellar.jpeg","Cellar.png","Char_Cole.png","Charge.png","Charging_Station.png","Chemsnail.png","Chilly_Charles_board.png","Chilly_Charles_Portrait.png","Chocoholic.png","Chocolate_Bar.png","Chris_Army_Knife.png","Chronobarrier.png","Chum.png","Chunk_of_Gold.jpeg","Chunk_of_Gold.png","Chunk_of_Lead.jpeg","Chunk_of_Lead.png","Cinder_Chase.png","Cinders.png","Citrus.png","Clamera.png","Claw_Arm.png","Clawrence.png","Claws.png","Cleaver.png","Clockwork_Blades.png","Closed_Sign.png","Cloudtop_Admiral_Board.png","Coconut.png","Coconut_Crab_board.png","Cog.png","Coincure.png","Cold_Room.png","Colossal_Popsicle.png","Combat_Core.png","Combat_Medic.png","Companion_Core.png","CompanionCore.png","Compass.png","Concealed_Dagger.png","Cookies.png","Cool_LEDs.png","Coolant.png","Cooling_Fan.png","Copper_Ed.png","Coral.png","Coral_Armor.png","Cosmic_Amulet.png","Cosmic_Plumage.png","Cosmic_Roc_board.png","Cove.png","Covetous_Raven.jpeg","Covetous_Raven.png","Covetous_Thief_board.png","Crane.png","Crimson_Dash.png","Crit.png","Crit_Icon.png","Critical_Core.png","Crocodile_Tears.jpeg","Crocodile_Tears.png","Crook.png","Crook.png.png","Crow%27s_Nest.png|Crow's Nest","Crude_Tools.jpg","Crusher_Claw.png","Cryosleeve.png","Cryosphere.png","Crypto.png","Crystal_Bonsai.png","Curry.png","Custom_Scope.png","Cutlass.png","Cybersecurity.png","D%27fleck.png|D'fleck","Dabbling_Apprentice_board.png","Dabora.png","Daggerwing.png","Dam.png","Darkstone_Engine.png","Darkstone_Focuser.png","Darkwater_Anglerfish.png","Deadly_Crooner_Portrait.png","Deadly_Duel.png","Death_Caps.png","Death_Knight_Reaper_board.png","Death_Knight_Reaper_Board.png","Deep_Sea_Fishing.png","Defense_Matrix.png","Diamond_Frame.png","Diana-Saur.png","Dire_Inglet_board.png","Dire_Mosquito_board.png","Disguise.png","Dishwasher.png","Dive_Weights.png","Diving_Helmet.png","DJ_Circuit_Breaker.png","Dock_Lines.png","Dog.png","Dooley_%28Character%29.png|Dooley (Character)","Dooley_Items_%28Character%29.png|Dooley Items (Character)","Dooley%27s_Scarf.png|Dooley's Scarf","Dooley%E2%80%99s_Workshop.png|Dooley’s Workshop","Dooltron.jpeg","Dooltron.png","Dooltron_Board.png","Dooltron_Mainframe.jpeg","Dooltron_Mainframe.png","Double_Barrel.png","Double_Whammy.png","Dr._Vortex_board.png","Dragon_board.png","Dragon_Heart.png","Dragon_Tooth.png","Dragon_Whelp.png","Dragon_Wing.png","Dragon%27s_Breath.png|Dragon's Breath","Duct_Tape.png","Dumpster_Diving.png","Eagle_Talisman.png","Earrings.png","Eating_Contest.png","Eccentric_Etherwright_board.png","Economic_Seminar.png","Ectoplasm.png","Eject_Button.png","Electric_Eels.png","Elemental_Depth_Charge.png","Elite_Duelist_board.png","Emerald.png","Emergency_Draught.png","ENC_Event_Haddy_Char.png","ENC_Event_VanessasQuarters_BG.png","ENC_Event_Workshop_BG.png","ENC_Mechant_MrMorland_Char.png","ENC_Merchant_Argent_Char.png","ENC_Merchant_Dazzle_Char.png","ENC_Merchant_Eli_Char.png","ENC_Merchant_Flex_Char.png","ENC_Merchant_Fortis_Char.png","ENC_Merchant_Gleam_Char.png","ENC_Merchant_Goldie_Char.png","ENC_Merchant_Newby_Char.png","ENC_Merchant_Prospero_Char.png","ENC_Merchant_Regenald_Char.png","ENC_Merchant_Saeymun_Char.png","ENC_Merchant_SenseiScotty_Char.png","ENC_Merchant_Sterling_Char.png","ENC_Merchant_TheGrandmaster_BG.png","ENC_Merchant_Tinker_Char.png","ENC_Merchant_ToksClocks_Char.png","ENC_Merchant_Valpak_Char.png","ENC_Merchant_Zara_Char.png","ENC_Merchant_Zosima_Char.png","ENC_Merchant_ZurphinsSafari_Char.png","Enclave_Revenant_board.png","Enclave_Revenant_Portrait.png","Enclave_Weeper_Portrait.png","Energy_Potion.png","Epic_Battle.png","Epicurean_Chocolate.png","Essence_Overflow.png","Ethergy_Conduit.png","Ethergy_Conduit_%28Low_Res%29.png|Ethergy Conduit (Low Res)","Event_GumballMachine.png","Event_Study.png","Exoskeleton.png","Explosive_Potions.png","Extract.png","Extract_Event.png","Eye_of_the_Colossus.png","Fang.png","Fanged_Inglet.png","Fanged_Inglet_board.png","Fanged_Inglet-Board.png","Feather.png","Ferros_Khan_board.png","Ferros_Khan_Portrait.png","Fiber_Optics.png","FieryPawnShop.png","FieryTextiles.png","FieryVineyard.png","Figurehead.png","Finn%E2%80%99s_Big_Bite.png|Finn’s Big Bite","Fire_Bomb.png","Fire_Claw.png","Fire_Potion.png","Fireflies.jpeg","Fireflies.png","First_Aiden.png","Fishing_Net.png","Fishing_Rod.png","Fixer_Upper.png","Flagship.png","Flail.png","Flamb%C3%A9.png|Flambé","Flamberge.png","Flame_Juggler_board.png","Flamecoil_Gem.png","Flamedancer.png","Flamethrower.png","Flare_Gun.png","Flashbang.png","Floor_Spike.jpeg","Floor_Spike.png","Flurry_of_Blows.png","Focused_Rage.png","Force_Field.png","Foreman_board.png","Forgotten_God_%28Cropped%29.png|Forgotten God (Cropped)","Forja.png","Forklift.png","Form.png","Fort.png","Foundation_Weeper_board.png","Free_Ride.png","Freeze.png","Freezer.png","Friend_Zone.png","Friendly_Doll.png","Frost_Potion.png","Frost_Street_Challenger_board.png","Frost_Street_Champion_board.png","Frozen_Bludgeon.png","Frozen_Flame.jpeg","Frozen_Flame.png","Frozen_Tomb.png","Fungal_Spores.png","Furnace.png","Futura.png","Gamma_Ray.png","Ganjo.png","Gaseo.png","Gatling_Gun.png","Gavel.png","Gearnola_Bar.png","Genie_Lamp.png","Genie_Lamp_Event.png","Ghost_Pepper_board.png","Giant_Ice_Club.png","Giant_Mosquito_board.png","Gland.png","Globe.png","Goggles.png","Gold_Icon.png","Golf_Clubs.png","Goop_Flail.jpeg","Goop_Flail.png","Gorgon_Noble_board.png","Gorgon_Noble_Board.png","GPU.png","Grandfather_Klok_Board.png","Grapeshot.png","Grappling_Hook.png","Green_Gumball.png","Greenheart_Guardian_Board.png","Grenade.png","Grindstone.png","GRN-W4SP.jpeg","GRN-W4SP.png","Guard_Locker.png","Guardian_Shell.png","Guardian%27s_Fury_Sprite.png|Guardian's Fury Sprite","Guardian%27s_Gorge.png|Guardian's Gorge","Gumball_Machine.png","Gunpowder.png","Hacksaw.png","Hakurvian_Rocket_Trooper_Portrait.png","Haladie.png","Hammer.png","Hammlet.png","Hammock.png","Handaxe.png","Hands_of_Time.png","Hardly_Workin%27.png|Hardly Workin'","Harkuvian_Launcher.png","Harkuvian_Rocket_Trooper_board.png","Harmadillo.png","Harpoon.png","Haste.png","Haste_and_Charge_Icon.png","Hatchet.png","Haunted_Kimono_Board.png","Haunted_Kimono_Portrait.png","Haunting_Flight.png","Heal.png","Heal_Icon.png","Healthy_Lifestyle.png","Heat_Lover.png","Hellbilly_board.png","Hemlock.png","Herbal_Supplements.png","Hogwash.png","Hologram_Projector.png","Holsters.png","Honing_Steel.png","Hooverbike_Hooligan_board.png","Hospital.png","Hot_Sauce.png","Hot_Springs.png","Hot_Stones.png","Hourglass.jpeg","Hourglass.png","House_Party.png","Housewarming_Gifts.png","Hulking_Experiment_board.png","Hydraulic_Squeezer.png","Hypergreens.png","Ice_9000.png","Ice_Bomb.png","Ice_Claw.jpeg","Ice_Claw.png","Ice_Cream_Truck.png","Ice_Cubes.png","Ice_Luge.png","Ice_Pick.png","Iceberg.png","Icebreaker.png","Icewatch_Warden.png","Icicle.png","Icon_Skill_ArmsDealer.png","Icon_Skill_ArtillerySpotter.png","Icon_Skill_Backroom.png","Icon_Skill_BackupDefenses.png","Icon_Skill_BalancedFriendship.png","Icon_Skill_BalanceSpecialist.png","Icon_Skill_BalanceWorkout.png","Icon_Skill_Berserker.png","Icon_Skill_BigGuns.png","Icon_Skill_BigNumbers.png","Icon_Skill_Bloodhound.png","Icon_Skill_Bold_under_Pressure.png","Icon_Skill_BoldUnderPressure.png","Icon_Skill_Brawler.png","Icon_Skill_BuddySystem.png","Icon_Skill_BuildingCrescendo.png","Icon_Skill_BulletTime.png","Icon_Skill_BurningShield.png","Icon_Skill_CaptainsCharge.png","Icon_Skill_CashDeposits.png","Icon_Skill_Cauterize.png","Icon_Skill_ChemicalFire.png","Icon_Skill_ChillZone.png","Icon_Skill_CircleOfLife.png","Icon_Skill_ClosingSpeed.png","Icon_Skill_CommandShip.png","Icon_Skill_CommercialZoning.png","Icon_Skill_ConcentratedDefense.png","Icon_Skill_ConcentratedFirepower.png","Icon_Skill_ConcentratedFlame.png","Icon_Skill_ConcentratedHealing.png","Icon_Skill_ConcentratedVenom.png","Icon_Skill_Conditioning.png","Icon_Skill_Conflagration.png","Icon_Skill_CoolantLeak.png","Icon_Skill_Corrosive_Toxins.png","Icon_Skill_CPUThrotteling.png","Icon_Skill_CreepingChill.png","Icon_Skill_CreepingToxines.png","Icon_Skill_CritialProtector.png","Icon_Skill_CriticalAid.png","Icon_Skill_CriticalCaptain.png","Icon_Skill_CriticalInvestments.png","Icon_Skill_DeadlyEye.png","Icon_Skill_DefenseGrid.png","Icon_Skill_DefensiveWeapons.png","Icon_Skill_DesperateFreeze.png","Icon_Skill_DesperateStrike.png","Icon_Skill_DistributedSystems.png","Icon_Skill_DOO_AngerManagement.png","Icon_Skill_DOO_Armor.png","Icon_Skill_DOO_Assimilation.png","Icon_Skill_DOO_BackupDefenses.png","Icon_Skill_DOO_BeautifulFriendship.png","Icon_Skill_DOO_BudgetAresenal.png","Icon_Skill_DOO_Burnout.png","Icon_Skill_DOO_ChainReaction.png","Icon_Skill_DOO_ChromePlated.png","Icon_Skill_DOO_Conditioning.png","Icon_Skill_DOO_CoolantLeak.png","Icon_Skill_DOO_Defensive.png","Icon_Skill_DOO_DefensiveMatrix.png","Icon_Skill_DOO_ElbowGrease.png","Icon_Skill_DOO_ElectrifiedHull.png","Icon_Skill_DOO_EmergencyShielding.png","Icon_Skill_DOO_ExtraArms.png","Icon_Skill_DOO_Fast.png","Icon_Skill_DOO_Fiery.png","Icon_Skill_DOO_Firepower.png","Icon_Skill_DOO_FrozenSynapse.png","Icon_Skill_DOO_GotGrit.png","Icon_Skill_DOO_Gunner.png","Icon_Skill_DOO_HeavyMachinery.png","Icon_Skill_DOO_HeavyMettle.png","Icon_Skill_DOO_HeroicPose.png","Icon_Skill_DOO_InorganicLifestyle.png","Icon_Skill_DOO_IntrusionCountermeasures.png","Icon_Skill_DOO_LettingOffSteam.png","Icon_Skill_DOO_LikeClockwork.png","Icon_Skill_DOO_LiquidCooled.png","Icon_Skill_DOO_MachineLearning.png","Icon_Skill_DOO_MakeshiftPlate.png","Icon_Skill_DOO_ModeratePlating.png","Icon_Skill_DOO_NumberOneStunner.png","Icon_Skill_DOO_Overclocked.png","Icon_Skill_DOO_PartingShot.png","Icon_Skill_DOO_PartyLikeIts11111001111.png","Icon_Skill_DOO_RedEnvelope.png","Icon_Skill_DOO_Resilience.png","Icon_Skill_DOO_RoyalSampler.png","Icon_Skill_DOO_SecretStash.png","Icon_Skill_DOO_SharpCorners.png","Icon_Skill_DOO_StaticAcceleration.png","Icon_Skill_DOO_Strong.png","Icon_Skill_DOO_Swole.png","Icon_Skill_DOO_ThickShield.png","Icon_Skill_DOO_ThickWalls.png","Icon_Skill_DOO_TitaniumCasing.png","Icon_Skill_DOO_Toxic.png","Icon_Skill_DOO_Turtling.png","Icon_Skill_DOO_WarmHugs.png","Icon_Skill_DOO_WellOiledMachine.png","Icon_Skill_DoubleDown.png","Icon_Skill_EmergencyBurn.png","Icon_Skill_Endurance.png","Icon_Skill_ExoticHerbs.png","Icon_Skill_ExposingToxins.png","Icon_Skill_Fiery.png","Icon_Skill_FinalDose.png","Icon_Skill_FinalFlame.png","Icon_Skill_FinesseShield.png","Icon_Skill_FinesseWeapon.png","Icon_Skill_FireAccelerant.png","Icon_Skill_FireStarter.png","Icon_Skill_FirstDegreeBurn.png","Icon_Skill_FirstFlames.png","Icon_Skill_FirstResponder.png","Icon_Skill_FirstStrike.png","Icon_Skill_Flagship.png","Icon_Skill_FlankingAid.png","Icon_Skill_FlankingCriticals.png","Icon_Skill_FlankingFire.png","Icon_Skill_FlankingShield.png","Icon_Skill_FlankingShots.png","Icon_Skill_FlankingToxins.png","Icon_Skill_FlashyMechanic.png","Icon_Skill_FlashyPilot.png","Icon_Skill_FlashyReload.png","Icon_Skill_FollowUpCare.png","Icon_Skill_FrontalShielding.png","Icon_Skill_Frostfire.png","Icon_Skill_FrozenShot.png","Icon_Skill_GlassCannon.png","Icon_Skill_GreaseFire.png","Icon_Skill_GrowthSpurt.png","Icon_Skill_Gunner.png","Icon_Skill_HardenedShield.png","Icon_Skill_HealingPower.png","Icon_Skill_HealingWeapon.png","Icon_Skill_HealthyCollector.png","Icon_Skill_Hearty.png","Icon_Skill_HeatedShells.png","Icon_Skill_HeatShield.png","Icon_Skill_HeavyFirepower.png","Icon_Skill_HeavyMettle.png","Icon_Skill_HeavyShielding.png","Icon_Skill_HeavyWeaponry.png","Icon_Skill_HonedArcenal.png","Icon_Skill_HonedStrike.png","Icon_Skill_HotSpot.png","Icon_Skill_Ignition.png","Icon_Skill_ImprovedToxins.png","Icon_Skill_ImprovisedBurn.png","Icon_Skill_ImprovisedHealing.png","Icon_Skill_ImprovisedPoison.png","Icon_Skill_ImprovisedProtection.png","Icon_Skill_ImprovisedWeaponry.png","Icon_Skill_Incinerate.png","Icon_Skill_InitialChill.png","Icon_Skill_InitialDose.png","Icon_Skill_InvigoratingCold.png","Icon_Skill_IronSharpensIron.png","Icon_Skill_JUL_AppliedRelief.png","Icon_Skill_JUL_Armor.png","Icon_Skill_JUL_Backroom.png","Icon_Skill_JUL_BakersDozen.png","Icon_Skill_JUL_BrainFreeze.png","Icon_Skill_JUL_BudgetAresenal.png","Icon_Skill_JUL_Burnout.png","Icon_Skill_JUL_ChefOfWar.png","Icon_Skill_JUL_DeepFried.png","Icon_Skill_JUL_DirtyDishes.png","Icon_Skill_JUL_Endurance.png","Icon_Skill_JUL_Entrepreneur.png","Icon_Skill_JUL_ExtraArms.png","Icon_Skill_JUL_FamilyStyle.png","Icon_Skill_JUL_FarmToTable.png","Icon_Skill_JUL_Fast.png","Icon_Skill_JUL_FastFood.png","Icon_Skill_JUL_FoodComa.png","Icon_Skill_JUL_FreezerBurn.png","Icon_Skill_JUL_GotGrit.png","Icon_Skill_JUL_GrandOpening.png","Icon_Skill_JUL_GreaseFire.png","Icon_Skill_JUL_HealthyFood.png","Icon_Skill_JUL_KnifeTricks.png","Icon_Skill_JUL_LargeAppetite.png","Icon_Skill_JUL_LargeShakers.png","Icon_Skill_JUL_LastCall.png","Icon_Skill_JUL_LineCook.png","Icon_Skill_JUL_MedicalTraining.png","Icon_Skill_JUL_MediumPortions.png","Icon_Skill_JUL_MixedMessage.png","Icon_Skill_JUL_MorningRush.png","Icon_Skill_JUL_PrizedPossession.png","Icon_Skill_JUL_ProteinPowder.png","Icon_Skill_JUL_RedEnvelope.png","Icon_Skill_JUL_Regenerative.png","Icon_Skill_JUL_Resilience.png","Icon_Skill_JUL_RoyalSampler.png","Icon_Skill_JUL_SecretIngredient.png","Icon_Skill_JUL_SecretStash.png","Icon_Skill_JUL_Sharpen.png","Icon_Skill_JUL_SizzlingSkillet.png","Icon_Skill_JUL_Spicy.png","Icon_Skill_JUL_StreetFood.png","Icon_Skill_JUL_Strong.png","Icon_Skill_JUL_Swole.png","Icon_Skill_JUL_TableSetting.png","Icon_Skill_JUL_TasteTesting.png","Icon_Skill_JUL_Tempering.png","Icon_Skill_JUL_WhatsThatSmell.png","Icon_Skill_JUL_Zesty.png","Icon_Skill_KeenEye.png","Icon_Skill_KnifeTricks.png","Icon_Skill_LargeAppetites.png","Icon_Skill_LargeItemSpecialist.png","Icon_Skill_LargePoison.png","Icon_Skill_LeftEyeDominant.png","Icon_Skill_LeftHanded.png","Icon_Skill_Lethargy.png","Icon_Skill_Lifting.png","Icon_Skill_LivingFlame.png","Icon_Skill_LongStride.png","Icon_Skill_MAK_Armor.png","Icon_Skill_MAK_Assassin.png","Icon_Skill_MAK_Backroom.png","Icon_Skill_MAK_Endurance.png","Icon_Skill_MAK_Fast.png","Icon_Skill_MAK_FountainOfYouth.png","Icon_Skill_MAK_GotGrit.png","Icon_Skill_MAK_MedicalTraining.png","Icon_Skill_MAK_MixedMessage.png","Icon_Skill_MAK_PrizedPossession.png","Icon_Skill_MAK_ProfessionalPride.png","Icon_Skill_MAK_RedEnvelope.png","Icon_Skill_MAK_Regenerative.png","Icon_Skill_MAK_Resilience.png","Icon_Skill_MAK_RoyalSampler.png","Icon_Skill_MAK_SecretStash.png","Icon_Skill_MAK_Storm.png","Icon_Skill_MAK_StormsFury.png","Icon_Skill_MAK_Strong.png","Icon_Skill_MAK_Swole.png","Icon_Skill_MAK_Toxic.png","Icon_Skill_MakeshiftPlate.png","Icon_Skill_MasterSalesman.png","Icon_Skill_MedicalWard.png","Icon_Skill_MedicsShield.png","Icon_Skill_Microfiber.png","Icon_Skill_MiddleOfThePack.png","Icon_Skill_Minimalist.png","Icon_Skill_MixedMessage.png","Icon_Skill_MON_AerialAssault.png","Icon_Skill_MON_ALittleOfEverything_01.png","Icon_Skill_MON_ALittleOfEverything_02.png","Icon_Skill_MON_ALittleOfEverything_03.png","Icon_Skill_MON_AllTalk_01.png","Icon_Skill_MON_AllTalk_03.png","Icon_Skill_MON_AnythingToWin_01.png","Icon_Skill_MON_AnythingToWin_02.png","Icon_Skill_MON_AssaultFocus.png","Icon_SKILL_MON_AugmentedDefenses.png","Icon_SKILL_MON_AugmentedWeaponry.png","Icon_Skill_MON_BananaBreak_01.png","Icon_Skill_MON_BananaBreak_02.png","Icon_Skill_MON_BananaBreak_03.png","Icon_Skill_MON_BarrelOfThieves_01.png","Icon_Skill_MON_BarrelOfThieves_02.png","Icon_Skill_MON_BarrelOfThieves_03.png","Icon_Skill_MON_BarrelOfThieves_04.png","Icon_Skill_MON_BombingRun.png","Icon_Skill_MON_ChillingTouch.png","Icon_SKILL_MON_CleanStorefront.png","Icon_Skill_MON_Counterstrike.png","Icon_Skill_MON_DabblingApprentice_01.png","Icon_Skill_MON_DabblingApprentice_02.png","Icon_Skill_MON_DabblingApprentice_03.png","Icon_Skill_MON_DeathWish_01.png","Icon_Skill_MON_DeathWish_02.png","Icon_Skill_MON_DeathWish_03.png","Icon_Skill_MON_DiamondFangs.png","Icon_Skill_MON_DisdainForLife_01.png","Icon_Skill_MON_DisdainForLife_02.png","Icon_Skill_MON_DisdainForLife_03.png","Icon_Skill_MON_DraconicRage.png","Icon_Skill_MON_Drain_01.png","Icon_Skill_MON_Drain_02.png","Icon_Skill_MON_Drain_03.png","Icon_Skill_MON_DraonicRage.png","Icon_Skill_MON_DualWield.png","Icon_Skill_MON_EmergencyReload.png","Icon_Skill_MON_EnclaveWeeper_01.png","Icon_Skill_MON_EnclaveWeeper_02.png","Icon_Skill_MON_EnclaveWeeper_03.png","Icon_SKILL_MON_ExtremeComfort.png","Icon_Skill_MON_FieryRebirth_02.png","Icon_Skill_MON_FieryRebirth_03.png","Icon_Skill_MON_FieryRetort_01.png","Icon_Skill_MON_FieryRetort_02.png","Icon_Skill_MON_FieryRetort_03.png","Icon_Skill_MON_FlameWall_02.png","Icon_Skill_MON_FlameWall_03.png","Icon_Skill_MON_GlidedShell_01.png","Icon_Skill_MON_GlidedShell_02.png","Icon_Skill_MON_GlidedShell_03.png","Icon_Skill_MON_Greed_01.png","Icon_Skill_MON_Greed_02.png","Icon_Skill_MON_Greed_03.png","Icon_Skill_MON_GrowthSpurt_01.png","Icon_Skill_MON_GrowthSpurt_02.png","Icon_Skill_MON_GrowthSpurt_03.png","Icon_Skill_MON_Gulch_01.png","Icon_Skill_MON_Gulch_02.png","Icon_Skill_MON_Gulch_03.png","Icon_Skill_MON_HighImpact.png","Icon_Skill_MON_HulkingExperiment_02.png","Icon_Skill_MON_HulkingExperiment_03.png","Icon_Skill_MON_IcicleAmmo_01.png","Icon_Skill_MON_IcicleAmmo_02.png","Icon_Skill_MON_LashOut_01.png","Icon_Skill_MON_LashOut_02.png","Icon_Skill_MON_LashOut_03.png","Icon_Skill_MON_LivingFlame_01.png","Icon_Skill_MON_LivingFlame_02.png","Icon_Skill_MON_LivingFlame_03.png","Icon_Skill_MON_LordOfWastes_01.png","Icon_Skill_MON_LordOfWastes_02.png","Icon_Skill_MON_LordOfWastes_03.png","Icon_Skill_MON_Lurk_01.png","Icon_Skill_MON_Lurk_02.png","Icon_Skill_MON_Lurk_03.png","Icon_Skill_MON_LyinginWait_01.png","Icon_Skill_MON_LyinginWait_02.png","Icon_Skill_MON_LyinginWait_03.png","Icon_Skill_MON_MegaDrain_02.png","Icon_Skill_MON_MegaDrain_03.png","Icon_Skill_MON_MoneyIsPower_01.png","Icon_Skill_MON_MoneyIsPower_02.png","Icon_Skill_MON_MoneyIsPower_03.png","Icon_Skill_MON_Neophiliac.png","Icon_Skill_MON_OutlandsDervish_01.png","Icon_Skill_MON_OutlandsDervish_02.png","Icon_Skill_MON_OutlandsDervish_03.png","Icon_Skill_MON_PackLoyalty_01.png","Icon_Skill_MON_PackLoyalty_02.png","Icon_Skill_MON_PackLoyalty_03.png","Icon_Skill_MON_PackLoyalty_05.png","Icon_Skill_MON_PetrifyingGaze_01.png","Icon_Skill_MON_PetrifyingGaze_02.png","Icon_Skill_MON_PetrifyingGaze_03.png","Icon_Skill_MON_Pyromania.png","Icon_Skill_MON_Pyromania_01.png","Icon_Skill_MON_Pyromania_02.png","Icon_Skill_MON_Pyromania_03.png","Icon_Skill_MON_RedundantSystems.png","Icon_Skill_MON_RevitalizingToxins.png","Icon_Skill_MON_RoamingIsle_01.png","Icon_Skill_MON_RoamingIsle_02.png","Icon_Skill_MON_RoamingIsle_03.png","Icon_Skill_MON_RogueScrapper_02.png","Icon_Skill_MON_RogueScrapper_03.png","Icon_Skill_MON_SharpenedSteel.png","Icon_Skill_MON_Skyfall_01.png","Icon_Skill_MON_Skyfall_02.png","Icon_Skill_MON_Skyfall_03.png","Icon_Skill_MON_Smack_01.png","Icon_Skill_MON_Smack_02.png","Icon_Skill_MON_Smack_03.png","Icon_Skill_MON_SparringPartner.png","Icon_Skill_MON_SpreadingInfection_01.png","Icon_Skill_MON_SpreadingInfection_02.png","Icon_Skill_MON_SpreadingInfection_03.png","Icon_Skill_MON_TheColdShoulder_01.png","Icon_Skill_MON_TheColdShoulder_02.png","Icon_Skill_MON_TheColdShoulder_03.png","Icon_Skill_MON_TheMostDiseased_01.png","Icon_Skill_MON_TheMostDiseased_02.png","Icon_Skill_MON_TheMostDiseased_03.png","Icon_Skill_MON_TheRightTool.png","Icon_Skill_MON_ThickSkin_01.png","Icon_Skill_MON_ThickSkin_02.png","Icon_Skill_MON_ThickSkin_03.png","Icon_Skill_MON_TimetoTinker01.png","Icon_Skill_MON_TimetoTinker02.png","Icon_SKILL_MON_ToxicFriendship.png","Icon_Skill_MON_Trained.png","Icon_Skill_MON_TrashTitan_01.png","Icon_Skill_MON_TrashTitan_02.png","Icon_Skill_MON_TrashTitan_03.png","Icon_Skill_MON_TurnOutYourPockets_01.png","Icon_Skill_MON_TurnOutYourPockets_02.png","Icon_Skill_MON_TurnOutYourPockets_03.png","Icon_Skill_MON_Unrelenting.png","Icon_Skill_MON_VoidEnergy01.png","Icon_Skill_MON_VoidRake.png","Icon_Skill_MON_VoidRender.png","Icon_Skill_MON_VolkasEnforcer_01.png","Icon_Skill_MON_VolkasEnforcer_02.png","Icon_Skill_MON_VolkasEnforcer_03.png","Icon_Skill_MON_Withdraw_01.png","Icon_Skill_MON_Withdraw_02.png","Icon_Skill_MON_Withdraw_03.png","Icon_Skill_MultiTargetLock.png","Icon_Skill_NaniteHealing.png","Icon_Skill_NetLauncher.png","Icon_Skill_Nimble.png","Icon_Skill_NoisyCricket.png","Icon_Skill_NTR_Armor_01.png","Icon_Skill_Outmaneuver.png","Icon_Skill_OverhealHaste.png","Icon_Skill_ParalyticPoison.png","Icon_Skill_PeacefulEye.png","Icon_Skill_Placeholder.png","Icon_Skill_PlatinumHeart.png","Icon_Skill_PoisonousOpener.png","Icon_Skill_PolePosition.png","Icon_Skill_PrecisionDiver.png","Icon_Skill_PrimeRealEstate.png","Icon_Skill_PropertyMogul.png","Icon_Skill_PYG_Armor.png","Icon_Skill_PYG_Backroom.png","Icon_Skill_PYG_BoarMarket.png","Icon_Skill_PYG_ChromePlated.png","Icon_Skill_PYG_CommercialZoning.png","Icon_Skill_PYG_Conditioning.png","Icon_Skill_PYG_Defensive.png","Icon_Skill_PYG_Durable.png","Icon_Skill_PYG_Endurance.png","Icon_Skill_PYG_Entrepreneur.png","Icon_Skill_PYG_Fast.png","Icon_Skill_PYG_FountainOfYouth.png","Icon_Skill_PYG_FrozenAssets.png","Icon_Skill_PYG_GenerousTip.png","Icon_Skill_PYG_GivePeaceAChance.png","Icon_Skill_PYG_GoldPlated.png","Icon_Skill_PYG_GotGrit.png","Icon_Skill_PYG_GrandOpening.png","Icon_Skill_PYG_Grocer.png","Icon_Skill_PYG_HealthyHoarder.png","Icon_Skill_PYG_HeavilyArmored.png","Icon_Skill_PYG_HogWild.png","Icon_Skill_PYG_Industrialist.png","Icon_Skill_PYG_Interest.png","Icon_Skill_PYG_IronHeart.png","Icon_Skill_PYG_JaballiStrength.png","Icon_Skill_PYG_Landlord.png","Icon_Skill_PYG_Lifting.png","Icon_Skill_PYG_MakeshiftPlate.png","Icon_Skill_PYG_ManualLabor.png","Icon_Skill_PYG_MixedMessage.png","Icon_Skill_PYG_ModeratePlating.png","Icon_Skill_PYG_ProfitMargin.png","Icon_Skill_PYG_QualityOverQuantity.png","Icon_Skill_PYG_QuickRecovery.png","Icon_Skill_PYG_RedEnvelope.png","Icon_Skill_PYG_ReinforcedSteel.png","Icon_Skill_PYG_Renovation.png","Icon_Skill_PYG_Resilience.png","Icon_Skill_PYG_Restoration.png","Icon_Skill_PYG_RoyalSampler.png","Icon_Skill_PYG_SecretStash.png","Icon_Skill_PYG_SharpCorners.png","Icon_Skill_PYG_Sharpen.png","Icon_Skill_PYG_StickerShock.png","Icon_Skill_PYG_Strong.png","Icon_Skill_PYG_Swole.png","Icon_Skill_PYG_TallBuildings.png","Icon_Skill_PYG_ThickShield.png","Icon_Skill_PYG_TimeIsMoney.png","Icon_Skill_PYG_Trader.png","Icon_Skill_PYG_Turtling.png","Icon_Skill_QualityOverQuantity.png","Icon_Skill_QuickDefenses.png","Icon_Skill_QuickDraw.png","Icon_Skill_QuickExposure.png","Icon_Skill_QuickFix.png","Icon_Skill_QuickFreeze.png","Icon_Skill_QuickHeal.png","Icon_Skill_QuickIgnition.png","Icon_Skill_RapidInfection.png","Icon_Skill_RapidProtection.png","Icon_Skill_RapidReconstruction.png","Icon_Skill_Ravenous.png","Icon_Skill_Re-Tooled.png","Icon_Skill_ReachingTheSummit.png","Icon_Skill_RearShielding.png","Icon_Skill_RedEnvelope.png","Icon_Skill_ReelEmIn.png","Icon_Skill_ReserveShield.png","Icon_Skill_RetalitoryToxins.png","Icon_Skill_RightEyeDominant.png","Icon_Skill_RightHanded.png","Icon_Skill_RightyTighty.png","Icon_Skill_Sabotage.png","Icon_Skill_ScopedShot.png","Icon_Skill_SearingBlade.png","Icon_Skill_SecondDegreeBurns.png","Icon_Skill_SecondWind.png","Icon_Skill_SharpCorners.png","Icon_Skill_Sharpshooter.png","Icon_Skill_Shatter.png","Icon_Skill_SickBurn.png","Icon_Skill_SlowandSteady.png","Icon_Skill_SlowBurn.png","Icon_Skill_SlowedTargets.png","Icon_Skill_SlowMotion.png","Icon_Skill_SmallGains.png","Icon_Skill_SmallSpecialist.png","Icon_Skill_SmallWeaponry.png","Icon_Skill_Specialist.png","Icon_Skill_Speed.png","Icon_Skill_StandadizedPoison.png","Icon_Skill_StandardizedCare.png","Icon_Skill_StandardizedDefences.png","Icon_Skill_StandardOrdinance.png","Icon_Skill_StaticAcceleration.png","Icon_Skill_StayingPower.png","Icon_Skill_STE_AboveTheClouds.png","Icon_Skill_STE_Acclimation.png","Icon_Skill_STE_AllTheRightTools.png","Icon_Skill_STE_AngleOfAttack.png","Icon_Skill_STE_Armor.png","Icon_Skill_STE_ArmoredVehciles.png","Icon_Skill_STE_BuckleUp.png","Icon_Skill_STE_BuffedAndPolished.png","Icon_Skill_STE_Burnout.png","Icon_Skill_STE_CommuterFlight.png","Icon_Skill_STE_DiveBomber.png","Icon_Skill_STE_EjectEject.png","Icon_Skill_STE_ElbowGrease.png","Icon_Skill_STE_Entrepreneur.png","Icon_Skill_STE_FallstreakHole.png","Icon_Skill_STE_Fast.png","Icon_Skill_STE_Fiery.png","Icon_Skill_STE_Flagship.png","Icon_Skill_STE_FlameBarrier.png","Icon_Skill_STE_GotGrit.png","Icon_Skill_STE_GreaseFire.png","Icon_Skill_STE_Grounded.png","Icon_Skill_STE_HeatShield2.png","Icon_Skill_STE_IronHeart.png","Icon_Skill_STE_LeftyLoosey.png","Icon_Skill_STE_LowPressureCenter.png","Icon_Skill_STE_MasterMechanic.png","Icon_Skill_STE_Nimble.png","Icon_Skill_STE_PrizedPossession.png","Icon_Skill_STE_ProfessionalPride.png","Icon_Skill_STE_RedEnvelope.png","Icon_Skill_STE_RegularMaintenance.png","Icon_Skill_STE_Resilience.png","Icon_Skill_STE_RightyTighty.png","Icon_Skill_STE_RoughLanding.png","Icon_Skill_STE_RoyalSampler.png","Icon_Skill_STE_RunningHot.png","Icon_Skill_STE_SecretStash.png","Icon_Skill_STE_ShootFirstGreenLight.png","Icon_Skill_STE_SonicBoom.png","Icon_Skill_STE_Storm.png","Icon_Skill_STE_StormsFury.png","Icon_Skill_STE_Strong.png","Icon_Skill_STE_Swole.png","Icon_Skill_STE_ThickWalls.png","Icon_Skill_STE_ThrillOfTheFlight.png","Icon_Skill_STE_Updraft.png","Icon_Skill_STE_VerticalTakeOff.png","Icon_Skill_STE_Workin.png","Icon_Skill_STE_WorkinHard.png","Icon_Skill_STE_WutheringHeights.png","Icon_Skill_SteadyDefender.png","Icon_Skill_Steelstorm.png","Icon_Skill_StopThat.png","Icon_Skill_StoutFire.png","Icon_Skill_Strenght.png","Icon_Skill_StrongArm.png","Icon_Skill_StunningHit.png","Icon_Skill_Swole.png","Icon_Skill_SwordandBoard.png","Icon_Skill_TableSetting.png","Icon_Skill_Tempering.png","Icon_Skill_TemporalStrike.png","Icon_Skill_TheBestDefence.png","Icon_Skill_ThickShield.png","Icon_Skill_ThirdDegreeBurns.png","Icon_Skill_Tinkerer.png","Icon_Skill_TinyDancer.png","Icon_Skill_ToolsOFTheTrade.png","Icon_Skill_Toughness.png","Icon_Skill_Toxic.png","Icon_Skill_ToxicFlame.png","Icon_Skill_ToxicInjector.png","Icon_Skill_ToxicShield.png","Icon_Skill_ToxicSpores.png","Icon_Skill_TracerFire.png","Icon_Skill_Trader.png","Icon_Skill_TraumaKit.png","Icon_Skill_VAN_Armor.png","Icon_Skill_VAN_ArmsDealer.png","Icon_Skill_VAN_Assassin.png","Icon_Skill_VAN_BarnacleCrusted.png","Icon_Skill_VAN_BigGuns.png","Icon_Skill_VAN_BoldUnderPressure.png","Icon_Skill_VAN_BudgetAresenal.png","Icon_Skill_VAN_Cadence.png","Icon_Skill_VAN_CalmUnderPressure.png","Icon_Skill_VAN_CaptainsDue.png","Icon_Skill_VAN_ChainReaction.png","Icon_Skill_VAN_CoolUnderPressure.png","Icon_Skill_VAN_CrashingWaves.png","Icon_Skill_VAN_DepthCharge.png","Icon_Skill_VAN_EasyPrey.png","Icon_Skill_VAN_ExtraRound.png","Icon_Skill_VAN_Fast.png","Icon_Skill_VAN_Fiery.png","Icon_Skill_VAN_FishAreFriends.png","Icon_Skill_VAN_FlameBarrier.png","Icon_Skill_VAN_Flank.png","Icon_Skill_VAN_Frostbite.png","Icon_Skill_VAN_GlassCannon.png","Icon_Skill_VAN_GotGrit.png","Icon_Skill_VAN_Gunner.png","Icon_Skill_VAN_HeatedShells.png","Icon_Skill_VAN_Intimidation.png","Icon_Skill_VAN_IronSharpensIron.png","Icon_Skill_VAN_LoadedFury.png","Icon_Skill_VAN_MediumHot.png","Icon_Skill_VAN_Nimble.png","Icon_Skill_VAN_Outmaneuver.png","Icon_Skill_VAN_PartingShot.png","Icon_Skill_VAN_RedEnvelope.png","Icon_Skill_VAN_ReelEmIn.png","Icon_Skill_VAN_Resilience.png","Icon_Skill_VAN_RoyalSampler.png","Icon_Skill_VAN_Runn.png","Icon_Skill_VAN_RunnGun.png","Icon_Skill_VAN_RunningOnEmpty.png","Icon_Skill_VAN_SecretStash.png","Icon_Skill_VAN_Sharpen.png","Icon_Skill_VAN_Spinach.png","Icon_Skill_VAN_Stabby.png","Icon_Skill_VAN_SteadyUnderPressure.png","Icon_Skill_VAN_StonefishHeart.png","Icon_Skill_VAN_StopThat.png","Icon_Skill_VAN_Strong.png","Icon_Skill_VAN_Submerged.png","Icon_Skill_VAN_Swole.png","Icon_Skill_VAN_TheBestDefense.png","Icon_Skill_VAN_Toxic.png","Icon_Skill_VengefulStrike.png","Icon_Skill_VenomousBlade.png","Icon_Skill_Warrior.png","Icon_Skills_Defender.png","Igloo.png","Ignition_Core.png","IllusoRay.png","Improvised_Bludgeon.png","Incendiary_Rounds.png","Incense.png","Induction_Aegis.png","Infernal_board.png","Infernal_Envoy_board.png","Infernal_Frigate_board.png","Infernal_Greatsword.png","Infinite_Potion.jpeg","Infinite_Potion.png","Infused_Bracers.png","Ingame.PNG","Insect_Bite.png","Insect_wing.png","Insect_Wing.png","Into_the_Void.png","Invest_in_Yourself.png","Invest_In_Yourself.png","Investment_Pitch.png","Invulnerability_Potion.png","Isochoric_Freezer.png","Item_1.jpg","Item_Skill_Spawn_Tier_Percentage_by_Day_Graph.png","Item_Skill_Spawn_Tier_Percentage_by_Day_Value.png","Jabalian_Drum.png","Jabalian_Longbow.png","Jack_of_All_Trades.png","Javelin.png","Jellyfish.png","Jewelry.png","Jitte.png","Joyful_Jack_board.png","Jule%E2%80%99s_Cafe.png|Jule’s Cafe","Jules_%28Character%29.png|Jules (Character)","Jules_Items_%28Character%29.png|Jules Items (Character)","Jungle_Ruins.png","Junkyard_Catapult.png","Junkyard_club.png","Junkyard_Club.png","Junkyard_Lance.png","Junkyard_Repairbot.png","Katana.png","Keychain.png","Kinetic_Cannon.png","Knee_Brace.png","Knife_Set.png","Kukri.png","Kyver_Commander_board.png","Kyver_Drone_board.png","Laboratory.jpeg","Laboratory.png","Landscraper.png","Languid_Dunes.png","Langxian.png","Laser_Pistol.png","Laser_Security_System.png","Ledger.png","Leeches.png","Lefty_Loosey.png","Lemonade_Stand.png","Lens.png","Letter_Opener.jpeg","Letter_Opener.png","Library.jpeg","Library.png","Lich_board.png","Lichboard.png","Life_Preserver.png","Lifting_Gloves.png","Lightbulb.png","Lighter.png","Lighthouse.png","Lightning_Rod.png","Likit.png","Lion_Cane.png","Loan_Shark_board.png","Loan_Shark_Portrait.png","Lockbox.png","Lol.PNG","Look_for_Spare_Change.png","Lord_Arken.png","Lord_Arken_board.png","Lord_of_the_Wastes_board.png","Lost_and_Found.png","Lost_And_Found.png","Loupe.png","Lumboars.png","Luxury_Kiuas.png","Luxury_Tents.png","Mad_Maddie.png","Magic_Carpet.png","Magician%27s_Top_Hat.png|Magician's Top Hat","Magma_Core.png","Magnifying_Glass.png","Magnus%27_Femur.png|Magnus' Femur","Maitoan_Altar.png","Mak_%28Character%29.png|Mak (Character)","Mak_Items_%28Character%29.png|Mak Items (Character)","Mak%27s_Laboratory.png|Mak's Laboratory","Makeshift_Barricade.png","Mandala.png","Mantis_Shrimp.png","Marble_Scalemail.png","Marbles.png","Marshalling_Lights.png","Master_Alchemist_board.png","Masterpiece.png","Matchbox.png","Mech-Moles.png","Med_Kit.png","Medicine_Cabinent.png","Medicine_Cabinet.png","Medkit.png","Memento_Mori.png","Memory_Card.png","Merchant_Aila_Portrait.png","Merchant_Ande_Portrait.png","Merchant_B1andB2_Portrait.png","Merchant_Barkun_Portrait.png","Merchant_Cobweb_Portrait.png","Merchant_Curio_Portrait.png","Merchant_FinnsBigBite_Portrait.png","Merchant_JayJay_Portrait.png","Merchant_Kev_Portrait.png","Merchant_Kina_Portrait.png","Merchant_Luxe_Portrait.png","Merchant_Med_Portrait.png","Merchant_Midsworth_Portrait.png","Merchant_Mittel_Portrait.png","Merchant_Nufu_Portrait.png","Merchant_OldZane_Portrait.png","Merchant_Pol_Portrait.png","Merchant_Quixel_Portrait.png","Metronome.png","Micro_Dave.png","Mimic_board.png","Mirror.jpeg","Mirror.png","Miss_Isles.png","Mittel_merchant_option.png","Mod_Squad_board.png","Model_Ship.png","Momma-Saur.png","Money_Tree.png","Monitor_Lizard.png","Monocle.png","Monocle..png","Monster_Ahexa_Portrait.png","Monster_AwakenedDistrict_Portrait.png","Monster_Banannabal_Portrait.png","Monster_BloodreefCaptain_Portrait.png","Monster_BloodreefRaider_Portrait.png","Monster_Boarrior_Portrait.png","Monster_BoilerroomBrawler_Portrait.png","Monster_BossHarrow_Portrait.png","Monster_Bouncertron_Portrait.png","Monster_Car_Conductor_Portrait.png","Monster_Chilly_Charles_Portrait.png","Monster_CloudtopAdmiral_Portrait.png","Monster_CloudtopOfficer_Portrait.png","Monster_CoconutCrab_Portrait.png","Monster_CosmicRoc_Portrait.png","Monster_CovetousThief_Portrait.png","Monster_DabblingApprentice_Portrait.png","Monster_DireIngle_Portrait.png","Monster_DireMosquito_Portrait.png","Monster_Dragon_Portrait.png","Monster_EccentricEtherwright_Portrait.png","Monster_EliteDuelist_Portrait.png","Monster_Enclave_Revenant_Portrait.png","Monster_FangedInglet_Portrait.png","Monster_Ferros_Khan_Portrait.png","Monster_FlameJuggler_Portrait.png","Monster_Foreman_Portrait.png","Monster_Foundation_Weeper_Portrait.png","Monster_FrostStreetChallenger_Portrait.png","Monster_FrostStreetChampion_Portrait.png","Monster_GhostPepper_Portrait.png","Monster_GiantMosquito_Portrait.png","Monster_GorgonNoble_Portrait.png","Monster_Harkuvian_Rocket_Trooper_Portrait.png","Monster_Hellbilly_Portrait.png","Monster_HulkingExperiment_Portrait.png","Monster_IncinerationBot_Portrait.png","Monster_Infernal_Portrait.png","Monster_InfernalDreadnought_Portrait.png","Monster_InfernalEnvoy_Portrait.png","Monster_InfernalFrigate_Portrait.png","Monster_Items_%28Character%29.png|Monster Items (Character)","Monster_JoyfulJack_Portrait.png","Monster_Kyver_Commander_Portrait.png","Monster_KyverNest_Portrait.png","Monster_Lich_Portrait.png","Monster_Loan_Shark_Portrait.png","Monster_LordArken_Portrait.png","Monster_LordOfTheWastes_Portrait.png","Monster_MadScientist_Portrait.png","Monster_MasterAlchemist_Portrait.png","Monster_Mimic_Portrait.png","Monster_Mod_Squad_Portrait.png","Monster_MrMoo_Portrait.png","Monster_Mugger_Portrait.png","Monster_OasisGuardian_Portrait.png","Monster_OutlandsDervish_Portrait.png","Monster_Preening_Duelist_Portrait.png","Monster_PreeningDuelist_Portrait.png","Monster_PrinceMarianas_Portrait.png","Monster_PropertyMogul_Portrait.png","Monster_Pyro_Portrait.png","Monster_RadiantCorsair_Portrait.png","Monster_Ranch.png","Monster_Reaper_Portrait.png","Monster_Retiree_Portrait.png","Monster_RoamingIsle_Portrait.png","Monster_RogueScraper_Portrait.png","Monster_Sabretooth_Portrait.png","Monster_Scouttrooper_Portrait.png","Monster_Scovyle_Portrait.png","Monster_Sergeant_Suds_Portrait.png","Monster_Shocktrooper_Portrait.png","Monster_SparringPartner_Portrait.png","Monster_Stew_Portrait.png","Monster_StreetGamer_Portrait.png","Monster_TempestBravo_Portrait.png","Monster_TentCityMayor_Portrait.png","Monster_TrashBandit_Portrait.png","Monster_TrashTitan_Portrait.png","Monster_TreasureTurtle_Portrait.png","Monster_VeteranOctopus_Portrait.png","Monster_Viper_Portrait.png","Monster_ViperTyrant_Portrait.png","Monster_VoidColossus_Portrait.png","Monster_VoidGolem_Portrait.png","Monster_VolkasEnforcer_Portrait.png","Monster_WanderingShoal_Portrait.png","Monster_Weapons_Platform_Portrait.png","Monster_Yerdan_Portrait.png","Monster_Zookeeper_Portrait.png","Morguloth%27s_board.png|Morguloth's board","Mortal_Coil.png","Mortar_%26_Pestle.png|Mortar & Pestle","Moth_to_a_Flame.png","Motherboard.png","Mothmeal.jpeg","Mothmeal.png","Mountain_Pass.png","Mr._Moo_board.png","Mr._Richardson.jpeg","Mr._Richardson.png","Mr._Tuskari.png","Multitool.png","Murkwood_Bayou.png","Musket.png","Myrrh.png","Mysterious_Portal.png","Mythkeeper_Board_%28No_Health%29.png|Mythkeeper Board (No Health)","Nanobot.png","Nanobot_Construction.png","Nargile.png","Narwhal.png","Necronomicon.png","Nesting_Doll.png","Neural_Toxin.png","Nightshade.png","Nitro.png","Nitrogen_Hammer.png","Noxious_Potion.png","Nullfrost_Altar.png","Oasis_Guardian_board.png","Obstacle_Course.png","Octopus.png","Oil_Lantern.jpeg","Oil_Lantern.png","Oinkment.png","Old_Saltclaw.jpeg","Old_Saltclaw.png","Old_Sword.png","Old_Zane.png","Omega_Ray.png","Open_Sign.png","Optical_Augment.png","Orange_Julian.jpeg","Orange_Julian.png","Orbital_Polisher.png","Orion.png","Ornithopter.png","Ouroboros_Statue.png","Outlands_Dervish_board.png","Oven_Mitts.png","Overheal_Regeneration.png","Palanquin.png","Paper_Airplane.png","Paralyzing_Rush.png","Passive_Power.png","Pawn_Shop.png","Peacewrought.png","Pearl.png","Pearl%27s_Dig_Site.png|Pearl's Dig Site","Pelt.png","Pendulum.png","PenFT.png","Pepper_Spray.png","Pesky_Pete.png","Pet_Rock.png","Philosopher%27s_Stone.jpeg|Philosopher's Stone","Philosopher%27s_Stone.png|Philosopher's Stone","Phonograph.png","Physical_Damage_Icon.png","Piano.jpeg","Piano.png","Pickled_Peppers.png","Pierre_Conditioner.png","Piggles.png","Piggy_Bank.png","Pinata.png","Piranha.png","Pistol_Sword.png","Pitchfork.png","Plague_Glaive.jpeg","Plague_Glaive.png","Plasma_Grenade.png","Plasma_Rifle.png","PNG_ENC_Merchant_Aero_Char.png","PNG_ENC_Merchant_Bolt_Char.png","PNG_ENC_Merchant_C4_Char.png","PNG_ENC_Merchant_Chronos_Char.png","PNG_ENC_Merchant_Corrosyn_Char.png","PNG_ENC_Merchant_Freiya_Char.png","PNG_ENC_Merchant_Ignus_Char.png","PNG_ENC_Merchant_Impedius_Char.png","PNG_ENC_Merchant_Nautica_Char.png","PNG_ENC_Merchant_Orion_Char.png","PNG_ENC_Merchant_Prospero_Char.png","PNG_ENC_Merchant_Revivo_Char.png","PNG_ENC_Merchant_Seraphina_Char.png","PNG_ENC_Merchant_Slohmor_Char.png","PNG_ENC_Merchant_Tinker_Char.png","PNG_ENC_Merchant_Venum_Char.png","PNG_ENC_Merchant_Vermir_Char.png","PNG_ENC_Merchant_Wrigglecap_Char.png","Poison.png","Poison_Tyrant.png","Pop_snappers.png","Pop_Snappers.png","Pop-Up_Shop.png","Poppy_Field.png","Port.png","Potent_Potables.png","Potion_Distillery.jpeg","Potion_Distillery.png","Potion_Potion.jpeg","Potion_Potion.png","Powder_Flask.png","Powder_Keg.png","Power_Drill.png","Power_Sander.png","Precision_Callipers.png","Precision_Tools.png","Preening_Duelist_board.png","Preening_Duelist_Portrait.png","Prince_Marianas_board.png","Private_Hot_Springs.png","Proboscis.png","Procure_Medkit.png","Product_Demonstrator_Board.png","Product_Showcase.png","Propane_Tank.png","Propeller.png","Property_Baron_board.png","Property_Baron_Jun_28_2025.png","Pufferfish.png","Pulse_Rifle.png","Purifying_Flame.png","Pyg%27s_Gym.png|Pyg's Gym","Pyg1.PNG","Pygmalien_%28Character%29.png|Pygmalien (Character)","Pygmalien_Items_%28Character%29.png|Pygmalien Items (Character)","Pygmalien%27s_Dagger.png|Pygmalien's Dagger","Pylon.png","Pyre.png","Pyro_board.png","Pyro_Portrait.png","Pyrocarbon.png","Qomatz.png","Qomatz_Board.png","Quick-defenses.webp","Quicksilver.jpeg","Quicksilver.png","Quill_and_Ink.jpeg","Quill_and_Ink.png","Race_Carl.png","Racetrack.png","Radiant_Corsair_board.png","Radiant_Corsair_Board.png","RaidtheVault.png","Railgun.png","Rainbow_Potion.png","Ramrod.png","Rapid_Injection_System.png","Rapid_Relief.png","Recycling_Bin.jpeg","Recycling_Bin.png","Recycling_Center.png","Red_Button.png","Red_Gumball.png","Red_Piggles.png","RED-F1R3FLY.jpeg","RED-F1R3FLY.png","Refractor.png","Regal_Blade.png","Regeneration.png","Regeneration_Potion.jpeg","Regeneration_Potion.png","Regenerative.png","Regenerative_Tincture.png","Relax.png","Relax_Bro.png","Remote_Control.png","Repeater.png","Retiree_board.png","Retiree_Portrait.png","Retort.jpeg","Retort.png","Revolver.png","Reward_SmallBuff_D.png","Reward_Upgrade_D.png","Rewards_Card.png","Riceballer.png","Rifle.png","Rigged.png","Ring_King_Gauntlets.png","Ritual_Dagger.png","Rivet_Gun.png","Roaming_Isle_board.png","Robe.png","Robo-Bouncer_Portrait.png","Robotic_Factory.png","Rocket_Boots.png","Rocket_Launcher.png","Rogue_Scrapper_board.png","Rolling_Pin.png","Rowboat.png","Ruby.png","Rune_Axe.png","Runic_Blade.jpeg","Runic_Blade.png","Runic_Daggers.jpeg","Runic_Daggers.png","Runic_Double_Bow.png","Runic_Great_Axe.png","Runic_Potion.jpeg","Runic_Potion.png","Rush.png","Rust.png","Sabretooth_board.png","Safe.png","Salamander_Pup.png","Salt.png","Sands_of_Time.png","Sanguine_Valley.png","Sapphire.png","Sat-Comm.jpeg","Sat-Comm.png","Satchel.png","Sauna.png","Scales.jpeg","Scales.png","Schematics.png","Scout_Trooper.png","Scout_Trooper_board.png","Scovyle_board.png","Scrap.png","Scrap_Metal.png","Scrap_Salvage.png","Screenshot_2024-11-10_000452.png","Screenshot_2024-11-10_005751.png","Scythe.png","Sea_Shell.png","Seadog%27s_Saloon.jpeg|Seadog's Saloon","Seadog%27s_Saloon.png|Seadog's Saloon","Seashadow.jpeg","Seashadow.png","Seaweed.png","Secret_Formula.jpeg","Secret_Formula.png","Security_Camera.png","Security_Center.png","Sergeant_Suds_board.png","Sextant.png","Shadowed_Cloak.png","Shard_of_Obsidian.png","Sharkclaws.png","Sharkray.png","Sharpening_Kit.png","Sharpening_Stone.png","Shield_Icon.png","Shipment.png","Shipwreck.png","Shock_Trooper_board.png","Shoe_Blade.png","Shot_Glasses.jpeg","Shot_Glasses.png","Shovel.png","Show_Globe.jpeg","Show_Globe.png","Showcase.png","Shrinking_Potion.jpeg","Shrinking_Potion.png","Shrouded_Figure.png","Sifting_Pan.jpeg","Sifting_Pan.png","Signet_Ring.png","Silencer.png","Silk_Scarf.png","Singularity.png","Siphoned_Shielding_Sprite.png","Sirens.png","Sirocco_Steppe.png","Site-logo.png","Skill_Fiery_Rebirth.png","Skillet.png","Skin_DOO_01a_StoreImage.png","Skin_DOO_02a_StoreImage.png","Skin_DOO_02b_StoreImage.png","Skin_DOO_03a_StoreImage.png","Skin_DOO_04a_StoreImage.png","Skin_DOO_04b_StoreImage.png","Skin_DOO_05a_StoreImage.png","Skin_DOO_06a_StoreImage.png","Skin_DOO_07a_StoreImage.png","Skin_DOO_07b_StoreImage.png","Skin_DOO_08a_StoreImage.png","Skin_DOO_09a_StoreImage.png","Skin_DOO_09b_StoreImage.png","Skin_DOO_10a_StoreImage.png","Skin_DOO_11a_StoreImage.png","Skin_DOO_12a_StoreImage.png","Skin_DOO_13a_StoreImage.png","Skin_DOO_13b_StoreImage.png","Skin_DOO_14a_StoreImage.png","Skin_DOO_15a_StoreImage.png","Skin_DOO_17a_StoreImage.png","Skin_DOO_18a_StoreImage.png","Skin_DOO_19a_StoreImage.png","Skin_DOO_20a_StoreImage.png","Skin_DOO_21a_StoreImage.png","Skin_JUL_01a_StoreImage.png","Skin_JUL_01b_StoreImage.png","Skin_JUL_02a_StoreImage.png","Skin_JUL_02b_StoreImage.png","Skin_JUL_03a_StoreImage.png","Skin_JUL_03b_StoreImage.png","Skin_JUL_04a_StoreImage.png","Skin_JUL_05a_StoreImage.png","Skin_JUL_06a_StoreImage.png","Skin_JUL_08a_StoreImage.png","Skin_JUL_09a_StoreImage.png","Skin_MAK_01a_StoreImage.png","Skin_MAK_02a_StoreImage.png","Skin_MAK_02b_StoreImage.png","Skin_MAK_03a_StoreImage.png","Skin_MAK_04a_StoreImage.png","Skin_MAK_05a_StoreImage.png","Skin_MAK_06a_StoreImage.png","Skin_MAK_07a_StoreImage.png","Skin_MAK_08a_StoreImage.png","Skin_MAK_09a_StoreImage.png","Skin_MAK_10a_StoreImage.png","Skin_MAK_11a_StoreImage.png","Skin_MAK_12a_StoreImage.png","Skin_MAK_13a_StoreImage.png","Skin_MAK_15a_StoreImage.png","Skin_MAK_17a_StoreImage.png","Skin_PYG_01a_StoreImage.png","Skin_PYG_01b_StoreImage.png","Skin_PYG_02a_StoreImage.png","Skin_PYG_02b_StoreImage.png","Skin_PYG_03a_StoreImage.png","Skin_PYG_04a_StoreImage.png","Skin_PYG_04b_StoreImage.png","Skin_PYG_05a_StoreImage.png","Skin_PYG_05b_StoreImage.png","Skin_PYG_06a_StoreImage.png","Skin_PYG_06b_StoreImage.png","Skin_PYG_07a_StoreImage.png","Skin_PYG_08a_StoreImage.png","Skin_PYG_08b_StoreImage.png","Skin_PYG_09a_StoreImage.png","Skin_PYG_09b_StoreImage.png","Skin_PYG_10a_StoreImage.png","Skin_PYG_11a_StoreImage.png","Skin_PYG_12a_StoreImage.png","Skin_PYG_13a_StoreImage.png","Skin_PYG_15a_StoreImage.png","Skin_PYG_17a_StoreImage.png","Skin_PYG_18a_StoreImage.png","Skin_PYG_19_StoreImage.png","Skin_STE_01a_StoreImage.png","Skin_STE_01b_StoreImage.png","Skin_STE_02a_StoreImage.png","Skin_STE_02b_StoreImage.png","Skin_STE_03a_StoreImage.png","Skin_STE_04a_StoreImage.png","Skin_STE_05a_StoreImage.png","Skin_STE_06a_StoreImage.png","Skin_STE_07a_StoreImage.png","Skin_STE_08a_StoreImage.png","Skin_STE_09a_StoreImage.png","Skin_STE_10a_StoreImage.png","Skin_STE_12a_StoreImage.png","Skin_VAN_01a_StoreImage.png","Skin_VAN_01b_StoreImage.png","Skin_VAN_02a_StoreImage.png","Skin_VAN_02b_StoreImage.png","Skin_VAN_03a_StoreImage.png","Skin_VAN_03b_StoreImage.png","Skin_VAN_03c_StoreImage.png","Skin_VAN_04a_StoreImage.png","Skin_VAN_05a_StoreImage.png","Skin_VAN_06a_StoreImage.png","Skin_VAN_07a_StoreImage.png","Skin_VAN_08a_StoreImage.png","Skin_VAN_09a_StoreImage.png","Skin_VAN_10a_StoreImage.png","Skin_VAN_11a_StoreImage.png","Skin_VAN_12a_StoreImage.png","Skin_VAN_12b_StoreImage.png","Skin_VAN_13a_StoreImage.png","Skin_VAN_14a_StoreImage.png","Skin_VAN_15a_StoreImage.png","Skin_VAN_17a_StoreImage.png","Skin_VAN_19a_StoreImage.png","Skin_VAN_20a_StoreImage.png","Skin_VAN_23a_StoreImage.png","Skyscraper.png","Sleeping_Potion.png","Slingshot.png","Slow.png","Slumbering_Primordial.png","Small_Refresh.png","Smelling_Salts.jpeg","Smelling_Salts.png","Snack_Time.png","Sniper_Rifle.png","SniperRifle.png","Snow_Globe.png","Snowflake.png","Snowmobile.png","Solar_Farm.png","Soldering_Gun.png","Soul_of_the_District.png","Soul_Ring.png","Spacescraper.png","Spare_Change.png","Sparring_Partner_board.png","Special_Damage_Icon.png","Speedrunner.png","Spices.png","Spider_Mace.jpeg","Spider_Mace.png","Spiked_Buckler.png","Spiky_Shield.png","Spirit_Defuser.png","Spyglass.png","Staff_of_the_Moose.jpeg","Staff_of_the_Moose.png","Stained_Glass_Window.png","Star_Chart.png","Steam_Ladle.png","Stelle_%28Character%29.png|Stelle (Character)","Stelle_Background.jpeg","Stelle_Items_%28Character%29.png|Stelle Items (Character)","Stinger.png","Stocked.png","Stopwatch.png","Street_Festival.png","Street_Gamer_board.png","Strength_Potion.jpeg","Strength_Potion.png","Study.png","Submarine.png","Submersible.png","Subscraper.png","Succulents.png","Sulphur.png","Sunderer.png","Sunlight_Spear.png","Super_Syrup.png","Swash_Buckle.png","Switchblade.png","Sword_Cane.jpeg","Sword_Cane.png","Sword_of_Swords.png","Tatiana.png","Tazidian_Dagger.png","Tea_Set.png","Techno_Virus_board.png","Teddy.png","Tempest_Flamedancer_board.png","TempGavel.png","Temple_Reliquary_%28Cropped%29.png|Temple Reliquary (Cropped)","Temporary_Shelter.png","Tent_City_Mayor.png","Tent_City_Mayor_board.png","Terrorform_Board.png","Tesla_Coil.png","Test_Subject_Alpha.png","Test_Subject_Alpha_Board.png","Textiles.png","The_Artist.png","The_Boulder.png","The_Clock.png","The_Core.png","The_Cult.png","The_Docks.png","The_Eclipse.png","The_Lost_Crate.png","The_Tome_of_Yyahan.jpeg","The_Tome_of_Yyahan.png","Thermal_Lance.png","Thieves_Guild.png","Thieves_Guild_Medallion.png","Thirsty.png","Throwing_Knives.png","Thrown_Net.png","Thrusters.png","Thug_board.png","Thurible.png","Tiny_Cutlass.png","Tiny_Furry_Monster.png","Tommoo_Gun.png","Toolbox.png","Torpedo.png","Tortuga.png","Tortuga_Board.png","Toughness.png","Tourist_Chariot.png","Toxic_Fuel.png","Toxic_Weapons.png","Trained_Spider.png","Tranquil_Spring.png","Trash_Golem_board.png","Trash_Titan_board.png","Treasure_Chest.png","Treasure_Turtle_board.png","Trebuchet.png","Trickle_Down_Economics.png","Tripwire.png","Tropical_Island.png","Truffles.png","Turtle_Shell.png","Tusked_Helm.png","Upgrade_Hammer.png","Utility_Box.png","Uwashiwali_Bird.png","Uzi.png","Valley_Fever.png","Vanessa_%28Character%29.png|Vanessa (Character)","Vanessa_Items_%28Character%29.png|Vanessa Items (Character)","Vanessa%27s_Amulet.png|Vanessa's Amulet","Vat_of_Acid.jpeg","Vat_of_Acid.png","Vending_Machine.png","Venom.png","Venomander.png","Venomous_Dose.png","Venomous_Vitality.png","Ventriloquist_board.png","Veteran_Octopus_board.png","Vial_Launcher.jpeg","Vial_Launcher.png","Vial_of_Blood.png","Vineyard.png","VIP_Pass.png","Viper.png","Viper_board.png","Viper_Cane.jpeg","Viper_Cane.png","Viper_Tyrant_board.png","Viper-Board.png","Virus.png","Vital_Renewal.png","Vital_Reserve.png","Vitality_Potion.jpeg","Vitality_Potion.png","Void_Colossus_board.png","Void_Golem_board.png","Void_Ray.png","Void_Shield.png","Volcanic_Vents.png","Volkas_Enforcer_board.png","Wake-Up_Call.png","Walk-in_Clinic.png","Wallace.png","Walter_Cooler.png","Wand.png","Wandering_Shoal_board.png","Wandering_Shoal%27s_Board.png|Wandering Shoal's Board","Wanted_Poster.png","Water_Wheel.png","Waters_of_Infinity.png","Weakpoint_Detector.png","Weaponized_Core.png","Weapons_Platform_board.png","Weapons_Platform_Portrait.png","Weaselpede.jpeg","Weaselpede.png","Weather_Glass.png","Weather_Machine.png","Weights.png","Welding_Helmet.png","Welding_Torch.png","Wild_Quillback.png","Windmill.png","Workshop.png","Wrench.png","Wrist_Warrior.png","Yellow_Gumball.png","Yellow_Piggles.png","Yerdan_board.png","Yeti_Crab.png","YLW-M4NT1S.jpeg","YLW-M4NT1S.png","Yo-Yo.png","Z-Shield.jpeg","Z-Shield.png","Z-Sword.jpeg","Z-Sword.png","Zoarcid.png","Zookeeper_bazaar.png","Zookeeper_board.png","Zosima.png"];
+const WIKI_BASE = "https://thebazaar.wiki.gg/images/";
+const WIKI_ITEMS = (()=>{
+  const map = new Map();
+  for(const enc of WIKI_FILES){
+    const i = enc.indexOf("|");
+    const path = i < 0 ? enc : enc.slice(0, i);
+    const guess = path.split("/").pop().replace(/\.[a-z0-9]+$/i, "").replace(/_/g, " ");
+    const name = i < 0 ? guess : enc.slice(i + 1);
+    const key = name.toLowerCase();
+    const isPng = /\.png$/i.test(path);
+    if(map.has(key) && !isPng) continue;   // 同名优先保留 png
+    map.set(key, { path, name, url: WIKI_BASE + path });
+  }
+  return [...map.values()].sort((a, b)=> a.name.localeCompare(b.name));
+})();
+const WIKI_BY_LOWER = WIKI_ITEMS.map(it=>it.name.toLowerCase());
+
+/* ============================================================
+   素材检索（基于本地索引，无需联网；图片经 wsrv.nl 代理加载）
+   ============================================================ */
+
+/* 本地检索：文件名包含全部关键词即命中，按匹配位置/长度排序 */
+function searchImages(kw){
+  const q = String(kw || '').trim().toLowerCase();
+  if(!q){
+    return WIKI_ITEMS.slice(0, 48).map(it => ({ name: it.name, url: it.url, thumb: proxied(it.url, 240) }));
+  }
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const out = [];
+  for(let i = 0; i < WIKI_ITEMS.length; i++){
+    const lower = WIKI_BY_LOWER[i];
+    let ok = true;
+    for(const t of tokens){ if(!lower.includes(t)){ ok = false; break; } }
+    if(!ok) continue;
+    let score;
+    if(lower === q) score = 6;
+    else if(lower.startsWith(q + ' ') || lower.startsWith(q)) score = 5;
+    else if((' ' + lower).includes(' ' + q)) score = 4;
+    else score = 2;
+    out.push({ it: WIKI_ITEMS[i], score, len: lower.length, pos: lower.indexOf(tokens[0]) });
+  }
+  out.sort((a, b)=> (b.score - a.score) || (a.pos - b.pos) || (a.len - b.len) || a.it.name.localeCompare(b.it.name));
+  return out.slice(0, 60).map(o => ({ name: o.it.name, url: o.it.url, thumb: proxied(o.it.url, 240) }));
+}
+
+/* ============================================================
+   图片缓存（blob → objectURL，保证画布不被污染）
+   ============================================================ */
+const imgCache = new Map();
+function ensureImage(url, onReady){
+  const src = proxied(url, 900);
+  if(!src) return null;
+  let entry = imgCache.get(src);
+  if(entry){ if(entry.loaded && onReady) onReady(entry.img); return entry; }
+  entry = { img: null, loaded: false, failed: false };
+  imgCache.set(src, entry);
+  (async ()=>{
+    try{
+      await sleep(40 + Math.random() * 60);
+      const res = await fetch(src);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.decoding = 'async';
+      await new Promise((resolve, reject)=>{
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = objUrl;
+      });
+      entry.img = img;
+      entry.loaded = true;
+      if(onReady) onReady(img);
+      draw();
+    }catch(err){
+      entry.failed = true;
+      console.warn('图片加载失败', url, err);
+    }
+  })();
+  return entry;
+}
+
+/* ============================================================
+   画布
+   ============================================================ */
+const canvas = $('grid');
+const ctx = canvas.getContext('2d');
+
+function geom(){
+  const contentW = state.cols * COL_W;
+  const contentH = state.rows * ROW_H;
+  const footerH = state.showFooter && state.footer ? FOOTER_H : 0;
+  const W = contentW + MARGIN * 2;
+  const H = TITLE_H + contentH + MARGIN * 2 + footerH;
+  return { contentW, contentH, footerH, W, H };
+}
+
+function applyCanvasWidth(){
+  const g = geom();
+  const zoom = document.body.classList.contains('canvas-zoom');
+  canvas.style.width = g.W + 'px';
+  canvas.style.maxWidth = zoom ? 'none' : '100%';
+}
+
+function resizeCanvas(){
+  const g = geom();
+  const scale = 2;
+  canvas.width = Math.round(g.W * scale);
+  canvas.height = Math.round(g.H * scale);
+  applyCanvasWidth();
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+}
+
+function font(size, weight){
+  return (weight ? weight + ' ' : '') + size + 'px system-ui,-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif';
+}
+
+function fitText(text, maxWidth){
+  const t = String(text || '');
+  if(ctx.measureText(t).width <= maxWidth) return t;
+  let s = t;
+  while(s.length > 1 && ctx.measureText(s + '…').width > maxWidth) s = s.slice(0, -1);
+  return s + '…';
+}
+
+function drawCellImage(cell, x, y, w, h){
+  const entry = imgCache.get(proxied(cell.image, 900));
+  if(!entry || !entry.loaded){
+    ctx.fillStyle = '#f7f4ee';
+    ctx.fillRect(x, y, w, h);
+    if(entry && entry.failed){
+      ctx.fillStyle = '#b8442f';
+      ctx.font = font(12);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('图片加载失败', x + w / 2, y + h / 2);
+    }
+    return;
+  }
+  const img = entry.img;
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  if(state.fit === 'cover'){
+    const ir = iw / ih, cr = w / h;
+    let sx, sy, sw, sh;
+    if(ir > cr){ sh = ih; sw = ih * cr; sx = (iw - sw) / 2; sy = 0; }
+    else { sw = iw; sh = iw / cr; sx = 0; sy = (ih - sh) / 2; }
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }else{
+    const s = Math.min(w / iw, h / ih);
+    const dw = iw * s, dh = ih * s;
+    ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+}
+
+function labelOf(i){
+  const cell = state.cells[i];
+  if(cell && cell.label) return cell.label;
+  return state.labels[i] || '';
+}
+
+function draw(){
+  const g = geom();
+  const scale = 2;
+
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.clearRect(0, 0, g.W, g.H);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, g.W, g.H);
+
+  const originX = MARGIN;
+  const originY = TITLE_H + MARGIN;
+  const contentW = g.contentW;
+
+  ctx.font = font(30, 'bold');
+  ctx.fillStyle = '#15110c';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(fitText(state.title || '', contentW), originX + contentW / 2, MARGIN + TITLE_H / 2 - 2);
+
+  ctx.save();
+  ctx.translate(originX, originY);
+
+  for(let i = 0; i < state.cols * state.rows; i++){
+    const cx = (i % state.cols) * COL_W;
+    const cy = Math.floor(i / state.cols) * ROW_H;
+    const cell = state.cells[i];
+
+    if(cell && cell.image){
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(cx + 1, cy + 1, IMG_W, IMG_H);
+      ctx.clip();
+      drawCellImage(cell, cx + 1, cy + 1, IMG_W, IMG_H);
+      ctx.restore();
+    }else{
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(cx + 1, cy + 1, IMG_W, IMG_H);
+    }
+
+    ctx.fillStyle = '#ece7de';
+    ctx.fillRect(cx + 1, cy + SEP_Y, IMG_W, 1);
+
+    const label = labelOf(i);
+    if(label){
+      ctx.font = font(14);
+      ctx.fillStyle = '#22201b';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(fitText(label, COL_W - 12), cx + COL_W / 2, cy + SEP_Y + CAP_H / 2 + 1);
+    }
+  }
+
+  ctx.strokeStyle = '#15110c';
+  ctx.lineWidth = 2;
+  for(let y = 0; y <= state.rows; y++){
+    ctx.beginPath();
+    ctx.moveTo(0, y * ROW_H);
+    ctx.lineTo(contentW, y * ROW_H);
+    ctx.stroke();
+  }
+  for(let x = 0; x <= state.cols; x++){
+    ctx.beginPath();
+    ctx.moveTo(x * COL_W, 0);
+    ctx.lineTo(x * COL_W, state.rows * ROW_H);
+    ctx.stroke();
+  }
+
+  if(hoverIndex >= 0 && hoverIndex < state.cols * state.rows){
+    const cx = (hoverIndex % state.cols) * COL_W;
+    const cy = Math.floor(hoverIndex / state.cols) * ROW_H;
+    ctx.fillStyle = 'rgba(0,0,0,.52)';
+    ctx.fillRect(cx + 2, cy + 2, COL_W - 4, IMG_H - 1);
+    ctx.fillStyle = '#fff';
+    ctx.font = font(14, 'bold');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.cells[hoverIndex] ? '点击更换' : '点击选择图片', cx + COL_W / 2, cy + IMG_H / 2);
+  }
+
+  ctx.restore();
+
+  if(g.footerH && state.footer){
+    ctx.font = font(10);
+    ctx.fillStyle = '#a9a094';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(fitText(state.footer, contentW), MARGIN, g.H - MARGIN + 2);
+  }
+}
+
+/* ============================================================
+   画布交互
+   ============================================================ */
+function hitTest(ev){
+  const g = geom();
+  const rect = canvas.getBoundingClientRect();
+  const x = (ev.clientX - rect.left) / rect.width * g.W - MARGIN;
+  const y = (ev.clientY - rect.top) / rect.height * g.H - (TITLE_H + MARGIN);
+  if(x < 0 || y < 0) return -1;
+  const c = Math.floor(x / COL_W);
+  const r = Math.floor(y / ROW_H);
+  if(c < 0 || c >= state.cols || r < 0 || r >= state.rows) return -1;
+  return r * state.cols + c;
+}
+
+canvas.addEventListener('mousemove', ev=>{
+  const i = hitTest(ev);
+  if(i !== hoverIndex){ hoverIndex = i; draw(); }
+});
+canvas.addEventListener('mouseleave', ()=>{ if(hoverIndex !== -1){ hoverIndex = -1; draw(); } });
+canvas.addEventListener('click', ev=>{
+  const i = hitTest(ev);
+  if(i < 0) return;
+  openPicker(i);
+});
+
+$('zoomToggle').addEventListener('click', ()=>{
+  const on = document.body.classList.toggle('canvas-zoom');
+  $('zoomToggle').textContent = on ? '适应宽度' : '查看原尺寸';
+  applyCanvasWidth();
+});
+
+/* ============================================================
+   选图弹窗
+   ============================================================ */
+const pickerEl = $('picker');
+const qInput = $('q');
+const resultsEl = $('results');
+const searchNoteEl = $('searchNote');
+
+function setNote(text, isErr){
+  searchNoteEl.className = 'note' + (isErr ? ' err' : '');
+  searchNoteEl.textContent = text || '';
+}
+function setBusy(busy){
+  const btn = $('searchBtn');
+  btn.disabled = busy;
+  btn.textContent = busy ? '搜索中…' : '搜索';
+  resultsEl.classList.toggle('loading', busy);
+}
+
+function openPicker(index){
+  currentIndex = index;
+  const cell = state.cells[index];
+  const label = state.labels[index] || '';
+  $('cellTag').textContent = '第 ' + (index + 1) + ' 格' + (label ? ' · ' + label : '');
+  $('urlInput').value = '';
+  resultsEl.innerHTML = '';
+  resultsEl._items = [];
+  setBusy(false);
+  setNote(cell && cell.image
+    ? '已选图片，可重新搜索替换，或直接上传本地图片。'
+    : '');
+  pickerEl.hidden = false;
+  document.body.classList.add('locked');
+  setTimeout(()=> qInput.focus(), 40);
+  doSearch(qInput.value);
+}
+
+function closeModal(el){
+  el.hidden = true;
+  document.body.classList.remove('locked');
+}
+pickerEl.addEventListener('click', ev=>{ if(ev.target === pickerEl) closeModal(pickerEl); });
+document.querySelectorAll('[data-close]').forEach(b=>{
+  b.addEventListener('click', ()=> closeModal(b.closest('.modal')));
+});
+document.addEventListener('keydown', ev=>{
+  if(ev.key === 'Escape') document.querySelectorAll('.modal:not([hidden])').forEach(m=> closeModal(m));
+});
+
+function doSearch(kw){
+  const q = String(kw || '').trim();
+  setBusy(false);
+  const items = searchImages(q);
+  if(!q){
+    setNote('已收录 ' + WIKI_ITEMS.length + ' 张 The Bazaar Wiki 图片。输入英文关键词（如 sword、potion、Vanessa）检索，或上传本地图片／粘贴图片网址。');
+    renderResults(items);
+    return;
+  }
+  if(!items.length){
+    resultsEl.innerHTML = '';
+    resultsEl._items = [];
+    setNote('没找到「' + q + '」。图片名多为英文（如 sword、shield、potion、boots），换个词试试，或直接上传图片。', true);
+    return;
+  }
+  setNote('匹配 ' + items.length + ' 张，点击即可放入格子。');
+  renderResults(items);
+}
+
+function renderResults(items){
+  resultsEl.innerHTML = items.map((it, i)=>
+    '<div class="ritem" data-i="' + i + '">' +
+      '<div class="box"><img src="' + esc(it.thumb) + '" loading="lazy" alt=""></div>' +
+      '<p>' + esc(it.name) + '</p>' +
+    '</div>'
+  ).join('');
+  resultsEl._items = items;
+  resultsEl.querySelectorAll('.ritem').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      resultsEl.querySelectorAll('.ritem.on').forEach(x=> x.classList.remove('on'));
+      el.classList.add('on');
+      applyImage(resultsEl._items[+el.dataset.i]);
+    });
+  });
+}
+
+$('searchForm').addEventListener('submit', ev=>{ ev.preventDefault(); doSearch(qInput.value); });
+$('searchBtn').addEventListener('click', ev=>{ ev.preventDefault(); doSearch(qInput.value); });
+
+$('quickRow').innerHTML = QUICK.map(k=> '<button class="mini" data-q="' + esc(k) + '">' + esc(k) + '</button>').join('');
+$('quickRow').querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=>{ qInput.value = b.dataset.q; doSearch(b.dataset.q); });
+});
+
+/* --- 落图 --- */
+function applyImage(img){
+  if(currentIndex === null) return;
+  if(!img || !img.url){ toast('这张图没有可用地址'); return; }
+  const cell = state.cells[currentIndex] || {};
+  state.cells[currentIndex] = {
+    kind: 'image',
+    image: img.url,
+    name: img.name || '',
+    label: cell.label || '',
+    source: img.source || 'wiki'
+  };
+  ensureImage(img.url);
+  persist(); draw(); syncMobile();
+  closeModal(pickerEl);
+  toast('已放入第 ' + (currentIndex + 1) + ' 格');
+}
+
+$('uploadBtn').addEventListener('click', ()=> $('imgFile').click());
+$('imgFile').addEventListener('change', async e=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file || currentIndex === null) return;
+  try{
+    const dataUrl = await new Promise((resolve, reject)=>{
+      const fr = new FileReader();
+      fr.onload = ()=> resolve(fr.result);
+      fr.onerror = reject;
+      fr.readAsDataURL(file);
+    });
+    const cell = state.cells[currentIndex] || {};
+    state.cells[currentIndex] = {
+      kind: 'image', image: dataUrl,
+      name: file.name.replace(/\.[^.]+$/, ''),
+      label: cell.label || '', source: 'local'
+    };
+    ensureImage(dataUrl);
+    persist(); draw(); syncMobile();
+    closeModal(pickerEl);
+    toast('已放入本地图片');
+  }catch(err){
+    toast('读取图片失败');
+  }
+});
+
+$('urlBtn').addEventListener('click', async ()=>{
+  const url = $('urlInput').value.trim();
+  if(!url) { $('urlInput').focus(); return; }
+  if(!/^https?:\/\//i.test(url)){ setNote('请粘贴 http(s) 开头的图片网址。', true); return; }
+  if(currentIndex === null) return;
+  const cell = state.cells[currentIndex] || {};
+  state.cells[currentIndex] = {
+    kind: 'image', image: url,
+    name: url.split('/').pop().replace(/\.[^.]+$/, ''),
+    label: cell.label || '', source: 'url'
+  };
+  ensureImage(url);
+  persist(); draw(); syncMobile();
+  closeModal(pickerEl);
+  toast('已使用该网址的图片');
+});
+
+$('clearBtn').addEventListener('click', ()=>{
+  if(currentIndex === null) return;
+  state.cells[currentIndex] = null;
+  persist(); draw(); syncMobile();
+  closeModal(pickerEl);
+});
+
+/* ============================================================
+   设置面板
+   ============================================================ */
+function labeledCount(){ return state.cols * state.rows; }
+
+function syncPanel(){
+  $('titleInput').value = state.title;
+  $('colsInput').value = state.cols;
+  $('rowsInput').value = state.rows;
+  $('labelsInput').value = state.labels.join('\n');
+  $('labelCount').textContent = labeledCount();
+  $('footerInput').value = state.footer;
+  $('footerShow').checked = state.showFooter;
+  $('fitSel').value = state.fit;
+  $('fmtSel').value = state.format;
+  $('scaleSel').value = String(state.scale);
+}
+
+function normalizeLabels(){
+  const n = labeledCount();
+  const arr = state.labels.slice(0, n);
+  while(arr.length < n) arr.push(DEFAULT_LABELS[arr.length] || '');
+  state.labels = arr;
+  const cells = state.cells.slice(0, n);
+  while(cells.length < n) cells.push(null);
+  state.cells = cells;
+}
+
+$('titleInput').addEventListener('input', e=>{ state.title = e.target.value; persist(); draw(); });
+$('footerInput').addEventListener('input', e=>{ state.footer = e.target.value; persist(); resizeCanvas(); draw(); });
+$('footerShow').addEventListener('change', e=>{ state.showFooter = e.target.checked; persist(); resizeCanvas(); draw(); });
+$('fitSel').addEventListener('change', e=>{ state.fit = e.target.value === 'cover' ? 'cover' : 'contain'; persist(); draw(); });
+$('fmtSel').addEventListener('change', e=>{ state.format = e.target.value; persist(); });
+$('scaleSel').addEventListener('change', e=>{ state.scale = +e.target.value; persist(); });
+
+$('colsInput').addEventListener('change', e=>{
+  const v = Math.max(1, Math.min(8, parseInt(e.target.value, 10) || 5));
+  state.cols = v; e.target.value = v;
+  normalizeLabels(); persist(); syncPanel(); syncMobile(); resizeCanvas(); draw();
+});
+$('rowsInput').addEventListener('change', e=>{
+  const v = Math.max(1, Math.min(8, parseInt(e.target.value, 10) || 3));
+  state.rows = v; e.target.value = v;
+  normalizeLabels(); persist(); syncPanel(); syncMobile(); resizeCanvas(); draw();
+});
+$('labelsInput').addEventListener('input', e=>{
+  state.labels = e.target.value.split('\n').map(s=> s.trim());
+  normalizeLabels();
+  $('labelCount').textContent = labeledCount();
+  persist(); draw(); syncMobile();
+});
+
+$('defaultLabelsBtn').addEventListener('click', ()=>{
+  const n = labeledCount();
+  state.labels = DEFAULT_LABELS.slice(0, n);
+  while(state.labels.length < n) state.labels.push('');
+  persist(); syncPanel(); draw(); syncMobile();
+  toast('已套用默认格名');
+});
+$('clearLabelsBtn').addEventListener('click', ()=>{
+  state.labels = new Array(labeledCount()).fill('');
+  persist(); syncPanel(); draw(); syncMobile();
+});
+$('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('清空全部格子？格名与标题保留。')) return;
+  state.cells = new Array(labeledCount()).fill(null);
+  persist(); draw(); syncMobile();
+});
+
+$('saveJsonBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.title || 'bazaar-grid') + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+});
+$('loadJsonBtn').addEventListener('click', ()=> $('fileInput').click());
+$('fileInput').addEventListener('change', async e=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  try{
+    const data = JSON.parse(await file.text());
+    if(!data || typeof data !== 'object') throw new Error('格式不正确');
+    state.title = String(data.title || state.title);
+    state.cols = Math.max(1, Math.min(8, +data.cols || 5));
+    state.rows = Math.max(1, Math.min(8, +data.rows || 3));
+    state.labels = Array.isArray(data.labels) ? data.labels.map(String) : DEFAULT_LABELS.slice();
+    state.cells = Array.isArray(data.cells) ? data.cells : new Array(state.cols * state.rows).fill(null);
+    state.footer = String(data.footer != null ? data.footer : state.footer);
+    state.showFooter = data.showFooter !== false;
+    state.fit = data.fit === 'cover' ? 'cover' : 'contain';
+    normalizeLabels();
+    loadAllImages();
+    persist(); syncPanel(); syncMobile(); resizeCanvas(); draw();
+    toast('配置已导入');
+  }catch(err){
+    toast('导入失败：' + err.message);
+  }finally{
+    e.target.value = '';
+  }
+});
+
+/* ============================================================
+   移动端格子列表
+   ============================================================ */
+const mobileMQ = window.matchMedia('(max-width:760px)');
+const isMobile = ()=> mobileMQ.matches;
+
+function setLabel(i, v){
+  state.labels[i] = v;
+  const cell = state.cells[i];
+  if(cell && cell.label) cell.label = '';
+  persist(); draw();
+}
+
+function syncMobile(){
+  const list = $('cellList');
+  if(!isMobile()){ list.innerHTML = ''; return; }
+  const n = labeledCount();
+  let html = '';
+  for(let i = 0; i < n; i++){
+    const cell = state.cells[i];
+    const label = labelOf(i);
+    const thumb = cell && cell.image
+      ? '<img class="thumb" src="' + esc(proxied(cell.image, 120)) + '" alt="" loading="lazy">'
+      : '<div class="thumb">＋</div>';
+    html += '<div class="cell-row">' +
+      '<span class="idx">' + (i + 1) + '</span>' + thumb +
+      '<div class="meta">' +
+        '<input class="label-input" data-i="' + i + '" value="' + esc(label) + '" placeholder="格名">' +
+        '<div class="sub">' + esc(cell ? (cell.name || '已选图片') : '空') + '</div>' +
+      '</div>' +
+      '<div class="acts">' +
+        '<button class="mini" data-pick="' + i + '">' + (cell ? '更换' : '选择') + '</button>' +
+        '<button class="mini danger" data-clear="' + i + '">清空</button>' +
+      '</div></div>';
+  }
+  list.innerHTML = html;
+  list.querySelectorAll('.label-input').forEach(inp=>{
+    const i = +inp.dataset.i;
+    inp.addEventListener('input', ()=> setLabel(i, inp.value));
+    inp.addEventListener('change', ()=> syncMobile());
+  });
+  list.querySelectorAll('[data-pick]').forEach(b=> b.addEventListener('click', ()=> openPicker(+b.dataset.pick)));
+  list.querySelectorAll('[data-clear]').forEach(b=> b.addEventListener('click', ()=>{
+    const i = +b.dataset.clear;
+    if(!state.cells[i]) return;
+    state.cells[i] = null;
+    persist(); draw(); syncMobile();
+  }));
+}
+mobileMQ.addEventListener('change', ()=>{ applyCanvasWidth(); draw(); syncMobile(); });
+
+/* ============================================================
+   导出
+   ============================================================ */
+function pendingImages(){
+  const out = [];
+  state.cells.forEach(c=>{
+    if(c && c.image){
+      const e = imgCache.get(proxied(c.image, 900));
+      if(!e || !e.loaded) out.push(c.image);
+    }
+  });
+  return out;
+}
+
+$('exportBtn').addEventListener('click', async ()=>{
+  const btn = $('exportBtn');
+  const ori = btn.textContent;
+  btn.disabled = true;
+
+  const missing = pendingImages();
+  missing.forEach(u=> ensureImage(u));
+  const t0 = Date.now();
+  while(pendingImages().length && Date.now() - t0 < 20000){
+    btn.textContent = '载入图片 ' + pendingImages().length + '…';
+    await sleep(120);
+  }
+  if(pendingImages().length) toast('部分图片未能载入，已按占位生成');
+
+  btn.textContent = '生成中…';
+  await sleep(30);
+
+  const scale = Math.max(1, Math.min(3, state.scale));
+  const out = document.createElement('canvas');
+  out.width = Math.round(canvas.width / 2 * scale);
+  out.height = Math.round(canvas.height / 2 * scale);
+  const octx = out.getContext('2d');
+  octx.imageSmoothingQuality = 'high';
+  octx.drawImage(canvas, 0, 0, out.width, out.height);
+
+  const mime = state.format === 'jpeg' ? 'image/jpeg' : 'image/png';
+  const ext = state.format === 'jpeg' ? 'jpg' : 'png';
+  let dataUrl;
+  try{
+    dataUrl = out.toDataURL(mime, 0.92);
+  }catch(err){
+    toast('导出失败：' + err.message);
+    btn.disabled = false; btn.textContent = ori;
+    return;
+  }
+
+  $('previewImg').src = dataUrl;
+  $('previewSize').textContent = out.width + ' × ' + out.height;
+  const name = (state.title || '大巴扎生涯个人爱好表').replace(/[\\/:*?"<>|]/g, '_') + '.' + ext;
+  const link = $('downloadLink');
+  link.href = dataUrl;
+  link.download = name;
+  $('preview').hidden = false;
+  document.body.classList.add('locked');
+
+  btn.disabled = false;
+  btn.textContent = ori;
+});
+
+/* ============================================================
+   持久化
+   ============================================================ */
+function persist(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(err){}
+}
+function restore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(!data || typeof data !== 'object') return;
+    state.title = String(data.title != null ? data.title : state.title);
+    state.cols = Math.max(1, Math.min(8, +data.cols || 5));
+    state.rows = Math.max(1, Math.min(8, +data.rows || 3));
+    state.labels = Array.isArray(data.labels) ? data.labels.map(String) : DEFAULT_LABELS.slice();
+    state.cells = Array.isArray(data.cells) ? data.cells : [];
+    state.footer = String(data.footer != null ? data.footer : state.footer);
+    state.showFooter = data.showFooter !== false;
+    state.fit = data.fit === 'cover' ? 'cover' : 'contain';
+    state.format = data.format === 'jpeg' ? 'jpeg' : 'png';
+    state.scale = [1,2,3].includes(+data.scale) ? +data.scale : 2;
+    normalizeLabels();
+  }catch(err){}
+}
+function loadAllImages(){
+  state.cells.forEach(c=>{ if(c && c.image) ensureImage(c.image); });
+}
+
+/* ============================================================
+   启动
+   ============================================================ */
+restore();
+normalizeLabels();
+syncPanel();
+resizeCanvas();
+loadAllImages();
+draw();
+syncMobile();
+
+window.addEventListener('resize', ()=>{ applyCanvasWidth(); draw(); });
+
+})();
+</script>
+</body>
+</html>
